@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path'); // 👈 ተጨምሯል
 const authRoutes = require('./routes/authRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
 const classRoutes = require('./routes/classRoutes');
@@ -15,16 +16,15 @@ require('dotenv').config();
 
 const app = express();
 
-// 👇 የ CORS ሴቲንግ (ለሁለቱም ለአካባቢው እና ለተሰማራው ዌብሳይት ፈቃድ ይሰጣል)
+// CORS ሴቲንግ
 const allowedOrigins = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
-  'https://iscms-project.vercel.app' // 
+  'https://iscms-project.vercel.app'
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
-    // ኦሪጅን ከሌለ (ለምሳሌ Postman) ወይም ከተፈቀደው ዝርዝር ውስጥ ካለ
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -35,6 +35,9 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+// 👇 የ uploads ፎልደርን ለህዝብ ክፍት ማድረግ (ፋይሎች እንዲታዩ)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
 app.use('/api/auth', authRoutes);

@@ -1,5 +1,10 @@
+// routes/resourceRoutes.js
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const Resource = require('../models/Resource');
 const {
   uploadResource,
   getResourcesByClass,
@@ -12,10 +17,61 @@ const {
 const { protect, allow } = require('../middleware/auth');
 
 // ==========================================
-// RESOURCE ROUTES
+// 1. የፋይል ማስቀመጫ ቦታ ማዘጋጀት (uploads ፎልደር)
+// ==========================================
+const uploadDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+const upload = multer({ storage: storage });
+
+// ==========================================
+// 2. RESOURCE ROUTES
 // ==========================================
 
-// Teacher uploads a resource
+// መምህር ፋይል ከኮምፒውተሩ ሲጭን (Upload File)
+router.post(
+  '/upload-file',
+  protect,
+  allow('teacher', 'admin'),
+  upload.single('file'),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+
+      const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+
+      const newResource = new Resource({
+        title: req.body.title,
+        description: req.body.description,
+        type: req.body.type,
+        url: fileUrl,
+        classroomId: req.body.classroomId,
+        subject: req.body.subject,
+        teacher: req.user.id
+      });
+
+      await newResource.save();
+      res.status(201).json({ message: 'File uploaded successfully', resource: newResource });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
+);
+
+// መምህር በ URL ሲጭን (ከዚህ በፊት የነበረው)
 router.post(
   '/upload',
   protect,
@@ -23,7 +79,7 @@ router.post(
   uploadResource
 );
 
-// Teacher views their own uploads
+// መምህር የራሱን ሀብቶች ማየት
 router.get(
   '/teacher/mine',
   protect,
@@ -31,7 +87,7 @@ router.get(
   getMyResources
 );
 
-// Get resources for a class (all logged-in users)
+// የክፍል ሀብቶችን ማየት (ለተማሪዎች፣ ወላጆች፣ መምህራን)
 router.get(
   '/class/:classroomId',
   protect,
@@ -39,7 +95,7 @@ router.get(
   getResourcesByClass
 );
 
-// Download a resource (increments counter, returns URL)
+// ሀብት ማውረድ (Download)
 router.get(
   '/:id/download',
   protect,
@@ -47,7 +103,7 @@ router.get(
   downloadResource
 );
 
-// Get one resource
+// አንድን ሀብት ማየት
 router.get(
   '/:id',
   protect,
@@ -55,7 +111,7 @@ router.get(
   getResourceById
 );
 
-// Update a resource
+// ሀብት ማስተካከል
 router.put(
   '/:id',
   protect,
@@ -63,7 +119,7 @@ router.put(
   updateResource
 );
 
-// Delete a resource
+// ሀብት መሰረዝ
 router.delete(
   '/:id',
   protect,
