@@ -36,9 +36,20 @@ export default function MyGrades() {
   const filtered =
     filter === 'all' ? marks : marks.filter((m) => m.term === filter);
 
+  const subjectSummary = data?.subjectSummary || [];
+  
+  // 👇 አጠቃላይ ድምርን በትክክል ማስላት (ለምሳሌ 6 ትምህርቶች ካሉ 510 / 600 ያሳያል)
+  const totalMarks = subjectSummary.reduce((sum, s) => sum + s.average, 0);
+  const totalPossible = subjectSummary.length * 100;
+  
+  // 👇 አማካይ ውጤት (ከ100)
+  const overallAverage = subjectSummary.length > 0 
+    ? (totalMarks / subjectSummary.length).toFixed(2) 
+    : 0;
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">My Grades</h1>
           <p className="text-sm text-gray-500 mt-1">
@@ -46,10 +57,11 @@ export default function MyGrades() {
           </p>
         </div>
 
+        {/* 👇 የ Term መምረጫ ሳጥን */}
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+          className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white"
         >
           <option value="all">All Terms</option>
           <option value="Term 1">Term 1</option>
@@ -58,22 +70,34 @@ export default function MyGrades() {
         </select>
       </div>
 
+      {/* 👇 አጠቃላይ አማካይ ውጤት ማሳያ ካርድ */}
+      {subjectSummary.length > 0 && (
+        <div className="bg-gradient-to-r from-indigo-500 to-blue-500 rounded-xl shadow-md p-6 mb-6 text-white flex justify-between items-center">
+          <div>
+            <p className="text-indigo-100 font-medium mb-1">Overall Average</p>
+            <h2 className="text-4xl font-bold">{overallAverage}%</h2>
+          </div>
+          <div className="text-right">
+            <p className="text-sm text-indigo-100">Total Score</p>
+            {/* 👇 ድምሩን በትክክል ያሳያል (ለምሳሌ 510 / 600) */}
+            <p className="text-xl font-bold">{totalMarks} / {totalPossible}</p>
+          </div>
+        </div>
+      )}
+
       {/* Subject summary */}
-      {data?.subjectSummary && data.subjectSummary.length > 0 && (
+      {subjectSummary.length > 0 && (
         <section className="mb-6">
           <h2 className="text-lg font-bold text-gray-700 mb-3">📊 Subject Averages</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {data.subjectSummary.map((s) => (
-              <div key={s.subject} className="bg-white rounded-lg shadow p-5">
-                <div className="flex justify-between items-start">
-                  <h3 className="font-bold text-gray-800">{s.subject}</h3>
-                  <GradeBadge grade={letterGrade(s.average)} />
-                </div>
-                <p className="text-3xl font-bold text-gray-800 mt-2">
-                  {s.average}%
+            {subjectSummary.map((s) => (
+              <div key={s.subject} className="bg-white rounded-lg shadow p-5 border border-slate-100">
+                <h3 className="font-bold text-gray-800 mb-2">{s.subject}</h3>
+                <p className="text-3xl font-bold text-indigo-600">
+                  {s.average} <span className="text-lg text-gray-400">/ 100</span>
                 </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  {s.markCount} assessment(s)
+                <p className="text-xs text-gray-500 mt-2">
+                  {s.markCount} assessment(s) recorded
                 </p>
               </div>
             ))}
@@ -88,10 +112,10 @@ export default function MyGrades() {
         </h2>
         {filtered.length === 0 ? (
           <div className="bg-gray-50 rounded-lg p-6 text-center text-gray-500">
-            No marks found.
+            No marks found for this term.
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-white rounded-lg shadow overflow-hidden border border-slate-100">
             <table className="w-full">
               <thead className="bg-gray-50 border-b">
                 <tr>
@@ -106,9 +130,6 @@ export default function MyGrades() {
                   </th>
                   <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
                     Score
-                  </th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                    Grade
                   </th>
                 </tr>
               </thead>
@@ -130,12 +151,10 @@ export default function MyGrades() {
                       <td className="px-4 py-3 text-sm text-center">
                         {m.term}
                       </td>
-                      <td className="px-4 py-3 text-sm text-center">
-                        {m.score} / {m.maxScore}
-                        <span className="text-gray-400 ml-1">({percentage}%)</span>
-                      </td>
                       <td className="px-4 py-3 text-center">
-                        <GradeBadge grade={letterGrade(percentage)} />
+                        <span className="px-3 py-1 rounded-full text-sm font-bold bg-indigo-50 text-indigo-700">
+                          {percentage} / 100
+                        </span>
                       </td>
                     </tr>
                   );
@@ -147,27 +166,4 @@ export default function MyGrades() {
       </section>
     </div>
   );
-}
-
-function GradeBadge({ grade }) {
-  const colors = {
-    A: 'bg-green-100 text-green-800',
-    B: 'bg-blue-100 text-blue-800',
-    C: 'bg-yellow-100 text-yellow-800',
-    D: 'bg-orange-100 text-orange-800',
-    F: 'bg-red-100 text-red-800'
-  };
-  return (
-    <span className={`px-2 py-1 text-xs rounded font-bold ${colors[grade] || 'bg-gray-100'}`}>
-      {grade}
-    </span>
-  );
-}
-
-function letterGrade(percent) {
-  if (percent >= 90) return 'A';
-  if (percent >= 80) return 'B';
-  if (percent >= 70) return 'C';
-  if (percent >= 60) return 'D';
-  return 'F';
 }

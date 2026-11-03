@@ -22,9 +22,13 @@ export default function TeacherDashboard() {
       `}>
         <div className="h-20 flex items-center px-6 border-b border-slate-100">
           <div className="flex items-center gap-3 w-full">
-            <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold shadow-md">
-              👩‍🏫
-            </div>
+            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-md bg-white p-0.5">
+              <img 
+                  src="/teacher-logo.png" 
+                  alt="Teacher" 
+                  className="w-full h-full object-contain"
+                />
+              </div>
             <div>
               <h2 className="text-base font-bold text-slate-800 tracking-tight">Wachemo</h2>
               <p className="text-xs text-slate-500 font-medium">Teacher Portal</p>

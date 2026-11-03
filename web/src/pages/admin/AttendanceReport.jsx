@@ -8,7 +8,7 @@ export default function AttendanceReport() {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(false);
   
-  // 👇 አዲስ የፍለጋ ስቴት
+  //  አዲስ የፍለጋ ስቴት
   const [classSearch, setClassSearch] = useState('');
 
   useEffect(() => {

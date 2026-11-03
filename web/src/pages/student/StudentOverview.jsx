@@ -42,13 +42,14 @@ export default function StudentOverview() {
     return <div className="text-center py-12 text-gray-500">Loading...</div>;
   }
 
-  // Calculate overall average from subject summary
   const subjectSummary = grades?.subjectSummary || [];
-  const overallAverage = subjectSummary.length
-    ? Math.round(
-        (subjectSummary.reduce((sum, s) => sum + s.average, 0) / subjectSummary.length) *
-          100
-      ) / 100
+  
+  // 1. የሁሉንም ውጤቶች ድምር (ከ600 የተገኘው)
+  const totalMarks = subjectSummary.reduce((sum, s) => sum + s.average, 0);
+  
+  // 2. አማካይ ውጤት (ከ100 የተገኘው) - ድምሩን ለትምህርት አይነቶች ቁጥር ከፍሎ
+  const overallAverage = subjectSummary.length > 0 
+    ? (totalMarks / subjectSummary.length).toFixed(2) 
     : 0;
 
   const attendanceRate = attendance?.summary?.attendanceRate || '0%';
@@ -65,8 +66,9 @@ export default function StudentOverview() {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <StatCard
-          title="Overall Average"
+          title="Overall Average (Out of 100)"
           value={`${overallAverage}%`}
+          subValue={`Total: ${totalMarks} / ${subjectSummary.length * 100}`}
           color="bg-blue-500"
         />
         <StatCard
@@ -102,10 +104,7 @@ export default function StudentOverview() {
                     Subject
                   </th>
                   <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                    Average
-                  </th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                    Grade
+                    Score (Out of 100)
                   </th>
                 </tr>
               </thead>
@@ -113,12 +112,27 @@ export default function StudentOverview() {
                 {subjectSummary.map((s) => (
                   <tr key={s.subject} className="border-b hover:bg-gray-50">
                     <td className="px-4 py-3 text-sm font-medium">{s.subject}</td>
-                    <td className="px-4 py-3 text-sm text-center">{s.average}%</td>
+                    {/* 👇 የእያንዳንዱ ትምህርት ውጤት ከ100 */}
                     <td className="px-4 py-3 text-center">
-                      <GradeBadge grade={letterGrade(s.average)} />
+                      <span className="px-3 py-1 rounded-full text-sm font-bold bg-indigo-50 text-indigo-700">
+                        {s.average} / 100
+                      </span>
                     </td>
                   </tr>
                 ))}
+                
+                {/* 👇 የአጠቃላይ ድምር እና አማካይ ማሳያ ረድፍ */}
+                <tr className="bg-slate-50 font-bold">
+                  <td className="px-4 py-3 text-sm text-right text-gray-700">Total / Overall Average</td>
+                  <td className="px-4 py-3 text-center">
+                    <div className="flex flex-col items-center justify-center gap-1">
+                      <span className="text-xs text-gray-500">Total: {totalMarks} / {subjectSummary.length * 100}</span>
+                      <span className="px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+                        Average: {overallAverage} / 100
+                      </span>
+                    </div>
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -167,35 +181,20 @@ export default function StudentOverview() {
   );
 }
 
-function StatCard({ title, value, color }) {
+// 👇 ስታቲስቲክስ ካርድ (subValue የሚል ተጨማሪ አማራጭ ተጨምሮበታል)
+function StatCard({ title, value, subValue, color }) {
   return (
-    <div className="bg-white rounded-lg shadow p-5">
-      <div className={`w-10 h-10 ${color} rounded-lg mb-3`}></div>
-      <div className="text-2xl font-bold text-gray-800">{value ?? 0}</div>
-      <div className="text-sm text-gray-500">{title}</div>
+    <div className="bg-white rounded-lg shadow p-5 flex flex-col justify-between">
+      <div>
+        <div className={`w-10 h-10 ${color} rounded-lg mb-3`}></div>
+        <div className="text-2xl font-bold text-gray-800">{value ?? 0}</div>
+        <div className="text-sm text-gray-500">{title}</div>
+      </div>
+      {subValue && (
+        <div className="text-xs text-gray-400 mt-2 font-medium border-t pt-2 border-gray-100">
+          {subValue}
+        </div>
+      )}
     </div>
   );
-}
-
-function GradeBadge({ grade }) {
-  const colors = {
-    A: 'bg-green-100 text-green-800',
-    B: 'bg-blue-100 text-blue-800',
-    C: 'bg-yellow-100 text-yellow-800',
-    D: 'bg-orange-100 text-orange-800',
-    F: 'bg-red-100 text-red-800'
-  };
-  return (
-    <span className={`px-2 py-1 text-xs rounded font-bold ${colors[grade] || 'bg-gray-100'}`}>
-      {grade}
-    </span>
-  );
-}
-
-function letterGrade(percent) {
-  if (percent >= 90) return 'A';
-  if (percent >= 80) return 'B';
-  if (percent >= 70) return 'C';
-  if (percent >= 60) return 'D';
-  return 'F';
 }
