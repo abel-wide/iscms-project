@@ -82,6 +82,16 @@ const translations = {
     homeroomTeacher: "HOMEROOM TEACHER",
     assigned: "Assigned",
 
+    //teacher
+    teacherDashboard: "Teacher Dashboard",
+    teacherOverviewSubtitle: "Overview of your classes and activities",
+    myClasses: "My Classes",
+    totalStudents: "Total Students",
+    noClassesAssigned: "You are not assigned to any class as homeroom teacher yet.",
+    recentAnnouncements: "Recent Announcements",
+    noAnnouncements: "No active announcements.",
+    by: "By",
+
     // Messages
     successClassCreated: "Class created successfully",
     errorClassCreate: "Failed to create class",
@@ -178,6 +188,17 @@ const translations = {
     close: "ዝጋ",
     homeroomTeacher: "የክፍል መምህር",
     assigned: "ተመድቧል",
+
+    //teacher
+    teacherDashboard: "የመምህር ዳሽቦርድ",
+    teacherOverviewSubtitle: "የክፍሎችዎ እና እንቅስቃሴዎችዎ አጠቃላይ እይታ",
+    myClasses: "የእኔ ክፍሎች",
+    totalStudents: "ጠቅላላ ተማሪዎች",
+    noClassesAssigned: "እስካሁን እንደ የክፍል መምህር አልተመደቡም።",
+    recentAnnouncements: "የቅርብ ጊዜ ማስታወቂያዎች",
+    noAnnouncements: "ምንም ንቁ ማስታወቂያ የለም።",
+    by: "በ",
+
     // Messages
     successClassCreated: "ክፍሉ በተሳካ ሁኔታ ተፈጥሯል",
     errorClassCreate: "ክፍል መፍጠር አልተቻለም",
