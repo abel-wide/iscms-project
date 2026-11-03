@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import API from '../../services/api';
 import { useAuth } from '../../context/useAuth';
+import { useLanguage } from '../../context/useLanguage'; // 👈 ተጨምሯል
 
 export default function MarkAttendance() {
   const { user } = useAuth();
+  const { t } = useLanguage(); // 👈 ተጨምሯል
   const [loading, setLoading] = useState(true);
   const [classes, setClasses] = useState([]);
   const [selectedClass, setSelectedClass] = useState('');
@@ -12,8 +14,6 @@ export default function MarkAttendance() {
   const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().substring(0, 10));
   const [message, setMessage] = useState(null);
   const [saving, setSaving] = useState(false);
-  
-  // አዲስ የፍለጋ State
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
@@ -36,15 +36,13 @@ export default function MarkAttendance() {
     };
 
     fetchClasses();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [user.id]);
 
   const handleClassSelect = (classId) => {
     setSelectedClass(classId);
     setMessage(null);
-    setSearchQuery(''); // ክፍል ሲቀየር ፍለጋውን አጽዳ
+    setSearchQuery('');
 
     const cls = classes.find((c) => c._id === classId);
     if (!cls) {
@@ -67,7 +65,6 @@ export default function MarkAttendance() {
   };
 
   const markAll = (status) => {
-    // የተጣሩትን ተማሪዎች ብቻ ለውጥ
     const filteredStudents = students.filter(s => 
       s.fullName.toLowerCase().includes(searchQuery.toLowerCase()) || 
       s.email.toLowerCase().includes(searchQuery.toLowerCase())
@@ -83,7 +80,7 @@ export default function MarkAttendance() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!selectedClass) {
-      setMessage({ type: 'error', text: 'Please select a class' });
+      setMessage({ type: 'error', text: t('selectClassError') || 'Please select a class' });
       return;
     }
 
@@ -102,81 +99,77 @@ export default function MarkAttendance() {
         records
       });
 
-      setMessage({
-        type: 'success',
-        text: res.data.message || 'Attendance saved successfully'
-      });
+      setMessage({ type: 'success', text: res.data.message || t('attendanceSaved') || 'Attendance saved successfully' });
     } catch (err) {
-      setMessage({
-        type: 'error',
-        text: err.response?.data?.message || 'Failed to save attendance'
-      });
+      setMessage({ type: 'error', text: err.response?.data?.message || t('attendanceFailed') || 'Failed to save attendance' });
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) {
-    return <div className="text-center py-12 text-gray-500">Loading classes...</div>;
-  }
+  if (loading) return <div className="text-center py-12 text-gray-500">{t('loading')}</div>;
 
-  // በፍለጋ ሳጥኑ መሰረት የተጣሩ ተማሪዎች
   const filteredStudents = students.filter(s => 
     s.fullName.toLowerCase().includes(searchQuery.toLowerCase()) || 
     s.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // የስታቲስቲክስ ቆጠራ
+  const presentCount = Object.values(attendance).filter(v => v === 'present').length;
+  const absentCount = Object.values(attendance).filter(v => v === 'absent').length;
+  const lateCount = Object.values(attendance).filter(v => v === 'late').length;
+  const excusedCount = Object.values(attendance).filter(v => v === 'excused').length;
+
   return (
-    <div>
+    <div className="max-w-6xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Mark Attendance</h1>
-        <p className="text-sm text-gray-500 mt-1">Record daily attendance for your students</p>
+        <h1 className="text-2xl font-bold text-gray-800">{t('markAttendance') || 'Mark Attendance'}</h1>
+        <p className="text-sm text-gray-500 mt-1">{t('markAttendanceSubtitle') || 'Record daily attendance for your students'}</p>
       </div>
 
       {message && (
-        <div className={`mb-4 px-4 py-3 rounded-lg ${message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+        <div className={`mb-4 px-4 py-3 rounded-lg border ${message.type === 'success' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
           {message.text}
         </div>
       )}
 
       {/* Controls */}
-      <div className="bg-white rounded-lg shadow p-4 mb-6 flex flex-wrap gap-4 items-end">
+      <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 mb-6 flex flex-wrap gap-4 items-end">
         <div className="flex-1 min-w-[200px]">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Class</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t('class') || 'Class'}</label>
           <select
             value={selectedClass}
             onChange={(e) => handleClassSelect(e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
           >
-            <option value="">-- Select class --</option>
+            <option value="">-- {t('selectClass') || 'Select class'} --</option>
             {classes.map((c) => (
               <option key={c._id} value={c._id}>
-                {c.className} ({c.students?.length || 0} students)
+                {c.className} ({c.students?.length || 0} {t('students') || 'students'})
               </option>
             ))}
           </select>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t('date') || 'Date'}</label>
           <input
             type="date"
             value={attendanceDate}
             onChange={(e) => setAttendanceDate(e.target.value)}
-            className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
           />
         </div>
 
-        {/* 👇 አዲሱ የፍለጋ ሳጥን (Search Box) */}
         {students.length > 0 && (
           <div className="flex-1 min-w-[200px]">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Search Student</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('searchStudent') || 'Search Student'}</label>
             <input
               type="text"
-              placeholder="Type name or email..."
+              placeholder={t('searchStudentPlaceholder') || 'Type name or email...'}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
             />
           </div>
         )}
@@ -186,16 +179,16 @@ export default function MarkAttendance() {
             <button
               type="button"
               onClick={() => markAll('present')}
-              className="text-sm bg-green-100 hover:bg-green-200 text-green-800 px-3 py-2 rounded-lg transition"
+              className="text-sm font-medium bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-2 rounded-lg transition"
             >
-              All Present
+              {t('allPresent') || 'All Present'}
             </button>
             <button
               type="button"
               onClick={() => markAll('absent')}
-              className="text-sm bg-red-100 hover:bg-red-200 text-red-800 px-3 py-2 rounded-lg transition"
+              className="text-sm font-medium bg-red-50 hover:bg-red-100 text-red-700 px-3 py-2 rounded-lg transition"
             >
-              All Absent
+              {t('allAbsent') || 'All Absent'}
             </button>
           </div>
         )}
@@ -203,47 +196,65 @@ export default function MarkAttendance() {
 
       {/* Student list */}
       {classes.length === 0 ? (
-        <div className="bg-gray-50 rounded-lg p-6 text-center text-gray-500">You are not assigned to any class as homeroom teacher.</div>
+        <div className="bg-white rounded-xl p-12 text-center border border-dashed border-slate-300 text-slate-500">
+          {t('noClassesAssigned') || 'You are not assigned to any class as homeroom teacher.'}
+        </div>
       ) : !selectedClass ? (
-        <div className="bg-gray-50 rounded-lg p-6 text-center text-gray-500">Select a class to start marking attendance.</div>
+        <div className="bg-white rounded-xl p-12 text-center border border-dashed border-slate-300 text-slate-500">
+          {t('selectClassToStart') || 'Select a class to start marking attendance.'}
+        </div>
       ) : students.length === 0 ? (
-        <div className="bg-gray-50 rounded-lg p-6 text-center text-gray-500">This class has no students yet.</div>
+        <div className="bg-white rounded-xl p-12 text-center border border-dashed border-slate-300 text-slate-500">
+          {t('noStudentsInClass') || 'This class has no students yet.'}
+        </div>
       ) : filteredStudents.length === 0 ? (
-        <div className="bg-gray-50 rounded-lg p-6 text-center text-gray-500">No students match your search "{searchQuery}".</div>
+        <div className="bg-white rounded-xl p-12 text-center border border-dashed border-slate-300 text-slate-500">
+          {t('noStudentsMatch') || `No students match your search "${searchQuery}".`}
+        </div>
       ) : (
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow overflow-hidden">
+        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b">
+            <thead className="bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wider">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Student</th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
+                <th className="px-4 py-3 text-left">#</th>
+                <th className="px-4 py-3 text-left">{t('student') || 'Student'}</th>
+                <th className="px-4 py-3 text-center">{t('status') || 'Status'}</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-slate-100">
               {filteredStudents.map((s, idx) => (
-                <tr key={s._id} className="border-b hover:bg-gray-50">
-                  <td className="px-4 py-3 text-sm text-gray-500">{idx + 1}</td>
-                  <td className="px-4 py-3 text-sm">
-                    <div className="font-medium text-gray-800">{s.fullName}</div>
-                    <div className="text-xs text-gray-500">{s.email}</div>
+                <tr key={s._id} className="hover:bg-slate-50 transition-colors">
+                  <td className="px-4 py-3 text-sm text-slate-400 font-medium">{idx + 1}</td>
+                  <td className="px-4 py-3">
+                    <div className="font-medium text-slate-800">{s.fullName}</div>
+                    <div className="text-xs text-slate-500">{s.email}</div>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-center gap-2">
-                      {['present', 'absent', 'late', 'excused'].map((status) => (
-                        <button
-                          key={status}
-                          type="button"
-                          onClick={() => handleStatusChange(s._id, status)}
-                          className={`text-xs px-3 py-1 rounded-full border capitalize transition-colors ${
-                            attendance[s._id] === status
-                              ? status === 'present' ? 'bg-green-500 text-white border-green-500' : status === 'absent' ? 'bg-red-500 text-white border-red-500' : status === 'late' ? 'bg-yellow-500 text-white border-yellow-500' : 'bg-blue-500 text-white border-blue-500'
-                              : 'bg-white text-gray-600 border-gray-300 hover:border-gray-400'
-                          }`}
-                        >
-                          {status}
-                        </button>
-                      ))}
+                      {['present', 'absent', 'late', 'excused'].map((status) => {
+                        const config = {
+                          present: { label: t('present'), color: 'bg-emerald-500 text-white border-emerald-500', hover: 'hover:border-emerald-300 hover:bg-emerald-50' },
+                          absent: { label: t('absent'), color: 'bg-red-500 text-white border-red-500', hover: 'hover:border-red-300 hover:bg-red-50' },
+                          late: { label: t('late'), color: 'bg-amber-500 text-white border-amber-500', hover: 'hover:border-amber-300 hover:bg-amber-50' },
+                          excused: { label: t('excused'), color: 'bg-blue-500 text-white border-blue-500', hover: 'hover:border-blue-300 hover:bg-blue-50' }
+                        };
+                        const isSelected = attendance[s._id] === status;
+                        
+                        return (
+                          <button
+                            key={status}
+                            type="button"
+                            onClick={() => handleStatusChange(s._id, status)}
+                            className={`text-xs font-medium px-3 py-1.5 rounded-lg border transition-all ${
+                              isSelected 
+                                ? config.color
+                                : `bg-white text-slate-600 border-slate-200 ${config.hover}`
+                            }`}
+                          >
+                            {config.label}
+                          </button>
+                        );
+                      })}
                     </div>
                   </td>
                 </tr>
@@ -251,12 +262,32 @@ export default function MarkAttendance() {
             </tbody>
           </table>
 
-          <div className="p-4 border-t bg-gray-50 flex justify-between items-center">
-            <div className="text-sm text-gray-600">
-              {Object.values(attendance).filter((v) => v === 'present').length} present · {Object.values(attendance).filter((v) => v === 'absent').length} absent
+          <div className="p-5 border-t border-slate-100 bg-slate-50 flex flex-col sm:flex-row justify-between items-center gap-4">
+            {/* 👇 የስታቲስቲክስ ማሳያ (Summary) */}
+            <div className="flex gap-4 text-sm font-medium">
+              <span className="text-emerald-600 flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span> {presentCount} {t('present')}
+              </span>
+              <span className="text-red-600 flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-red-500"></span> {absentCount} {t('absent')}
+              </span>
+              <span className="text-amber-600 flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-amber-500"></span> {lateCount} {t('late')}
+              </span>
+              <span className="text-blue-600 flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-blue-500"></span> {excusedCount} {t('excused')}
+              </span>
             </div>
-            <button type="submit" disabled={saving} className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white px-6 py-2 rounded-lg">
-              {saving ? 'Saving...' : 'Save Attendance'}
+
+            <button type="submit" disabled={saving} className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white px-8 py-2.5 rounded-xl font-medium transition-all flex justify-center items-center gap-2">
+              {saving ? (
+                <>
+                  <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  {t('saving') || 'Saving...'}
+                </>
+              ) : (
+                t('saveAttendance') || 'Save Attendance'
+              )}
             </button>
           </div>
         </form>
