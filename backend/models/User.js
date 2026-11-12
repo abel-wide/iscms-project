@@ -22,6 +22,11 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: null
   },
+  gradeLevel: { 
+    type: String, 
+    enum: ['KG', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8'],
+    required: function() { return this.role === 'student'; } 
+  },
   isActive: { type: Boolean, default: true }
 }, { timestamps: true });
 

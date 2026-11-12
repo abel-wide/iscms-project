@@ -10,7 +10,7 @@ const nodemailer = require('nodemailer');
 // ==========================================
 exports.register = async (req, res) => {
   try {
-    const { fullName, email, password, role } = req.body;
+    const { fullName, email, password, role, gradeLevel } = req.body;
 
     if (!fullName || !email || !password || !role) {
       return res.status(400).json({
@@ -29,6 +29,11 @@ exports.register = async (req, res) => {
         message: `Invalid role. Must be one of: ${validRoles.join(', ')}`
       });
     }
+    if (role === 'student' && !gradeLevel) {
+      return res.status(400).json({
+        message: 'Grade level is required for students'
+      });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -36,7 +41,8 @@ exports.register = async (req, res) => {
       fullName,
       email,
       password: hashedPassword,
-      role
+      role,
+      ...(role === 'student' && { gradeLevel })
     });
 
     res.status(201).json({
@@ -94,7 +100,8 @@ exports.login = async (req, res) => {
         id: user._id,
         name: user.fullName,
         email: user.email,
-        role: user.role
+        role: user.role,
+        gradeLevel: user.gradeLevel
       }
     });
   } catch (error) {
