@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom'; // 👈 useNavigate ተወግዶ Link ተጨምሯል
+import { useParams, Link } from 'react-router-dom';
 import API from '../../services/api';
 
 export default function StudentProfile() {
@@ -13,9 +13,11 @@ export default function StudentProfile() {
     const fetchStudent = async () => {
       try {
         const res = await API.get(`/users/${id}`);
-        setStudent(res.data);
+        console.log("Student API response:", res.data); // 👈 ሙሉውን መረጃ ተመልከት
+        const userData = res.data.user || res.data; // 👈 user ን ብቻ ውሰድ
+        setStudent(userData);
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching student:", err);
         setError('የተማሪውን መረጃ ማምጣት አልተቻለም።');
       } finally {
         setLoading(false);
@@ -31,7 +33,6 @@ export default function StudentProfile() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      {/* 👇 Back Button (አሁን Link ተጠቅሟል) */}
       <Link 
         to="/admin/students" 
         className="inline-flex mb-6 text-indigo-600 hover:text-indigo-800 items-center gap-2 font-medium transition-colors"
@@ -43,15 +44,13 @@ export default function StudentProfile() {
       </Link>
 
       <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-        {/* Header / Cover */}
         <div className="h-32 bg-gradient-to-r from-indigo-500 to-blue-500"></div>
         
-        {/* Profile Info */}
         <div className="px-8 pb-8">
           <div className="relative flex justify-between items-end -mt-12 mb-6">
             <div className="w-24 h-24 rounded-full bg-white p-1 shadow-lg">
               <div className="w-full h-full rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-3xl font-bold uppercase">
-                {student.name ? student.name.charAt(0) : 'S'}
+                {student.fullName ? student.fullName.charAt(0) : 'S'}
               </div>
             </div>
             <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold mb-2">
@@ -60,15 +59,17 @@ export default function StudentProfile() {
           </div>
 
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-slate-800">{student.name || 'ስም አልተመዘገበም'}</h1>
+            <h1 className="text-3xl font-bold text-slate-800">{student.fullName || 'ስም አልተመዘገበም'}</h1>
             <p className="text-slate-500 mt-1">{student.email}</p>
           </div>
 
-          {/* Details Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-slate-50 p-5 rounded-xl border border-slate-100">
               <p className="text-sm text-slate-500 mb-1">ክፍል (Class)</p>
-              <p className="font-semibold text-slate-800 text-lg">{student.className || 'አልተመደበም'}</p>
+              {/* 👇 የ gradeLevel ዋጋ በግልጽ ይታያል */}
+              <p className="font-semibold text-slate-800 text-lg">
+                {student.gradeLevel || student.className || 'አልተመደበም'}
+              </p>
             </div>
             <div className="bg-slate-50 p-5 rounded-xl border border-slate-100">
               <p className="text-sm text-slate-500 mb-1">ሮል (Role)</p>

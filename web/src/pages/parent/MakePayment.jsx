@@ -62,23 +62,25 @@ export default function MakePayment() {
   }, [selectedChild, t]);
 
   // 3. Handle Chapa Payment Initiation
-  const handleChapaPay = async () => {
-    setProcessing(true);
-    setMessage(null);
+const handleChapaPay = async () => {
+  setProcessing(true);
+  setMessage(null);
 
-    try {
-      const res = await API.post('/payments/chapa/initiate', {
-        studentId: selectedChild._id
-      });
-      window.location.href = res.data.checkoutUrl;
-    } catch (err) {
-      setMessage({
-        type: 'error',
-        text: err.response?.data?.message || t('paymentInitiationError') || 'Payment initiation failed'
-      });
-      setProcessing(false);
-    }
-  };
+  try {
+    const res = await API.post('/payments/chapa/initiate', {
+      studentId: selectedChild._id
+    });
+    console.log("Chapa response:", res.data); // 👈 የመልሱን ይዘት ተመልከት
+    window.location.href = res.data.checkoutUrl;
+  } catch (err) {
+    console.error("Chapa error:", err.response?.data); // 👈 ስህተቱን በኮንሶል ታየዋለህ
+    setMessage({
+      type: 'error',
+      text: err.response?.data?.message || err.message || 'Payment initiation failed'
+    });
+    setProcessing(false);
+  }
+};
 
   if (loading) return <div className="text-center py-12 text-gray-500">{t('loading')}</div>;
 

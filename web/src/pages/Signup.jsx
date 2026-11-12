@@ -10,7 +10,8 @@ export default function Signup() {
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'student'
+    role: 'student',
+    gradeLevel: '' 
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -21,7 +22,6 @@ export default function Signup() {
     e.preventDefault();
     setMessage(null);
 
-    // Validate
     if (form.password !== form.confirmPassword) {
       setMessage({ type: 'error', text: 'Passwords do not match' });
       return;
@@ -32,6 +32,12 @@ export default function Signup() {
       return;
     }
 
+    // ተማሪ ከሆነ ክፍል መምረጥ አለበት
+    if (form.role === 'student' && !form.gradeLevel) {
+      setMessage({ type: 'error', text: 'Please select your grade level' });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -39,7 +45,8 @@ export default function Signup() {
         fullName: form.fullName,
         email: form.email,
         password: form.password,
-        role: form.role
+        role: form.role,
+        gradeLevel: form.role === 'student' ? form.gradeLevel : undefined // 👈 ለተማሪ ብቻ
       });
 
       setMessage({
@@ -126,7 +133,7 @@ export default function Signup() {
             </label>
             <select
               value={form.role}
-              onChange={(e) => setForm({ ...form, role: e.target.value })}
+              onChange={(e) => setForm({ ...form, role: e.target.value, gradeLevel: '' })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
             >
               <option value="student">Student</option>
@@ -137,6 +144,32 @@ export default function Signup() {
               Admin and Registrar accounts are created by administrators.
             </p>
           </div>
+
+          {/* 👇 Grade Level - ተማሪ ሲመረጥ ብቻ ይታያል */}
+          {form.role === 'student' && (
+            <div className="animate-in fade-in duration-300">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Grade Level
+              </label>
+              <select
+                required
+                value={form.gradeLevel}
+                onChange={(e) => setForm({ ...form, gradeLevel: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none bg-white"
+              >
+                <option value="">-- Select Grade --</option>
+                <option value="KG">KG</option>
+                <option value="Grade 1">Grade 1</option>
+                <option value="Grade 2">Grade 2</option>
+                <option value="Grade 3">Grade 3</option>
+                <option value="Grade 4">Grade 4</option>
+                <option value="Grade 5">Grade 5</option>
+                <option value="Grade 6">Grade 6</option>
+                <option value="Grade 7">Grade 7</option>
+                <option value="Grade 8">Grade 8</option>
+              </select>
+            </div>
+          )}
 
           {/* Password */}
           <div>
