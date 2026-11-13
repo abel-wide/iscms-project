@@ -40,16 +40,16 @@ export default function RegistrarDashboard() {
         <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-2">
           <p className="px-2 text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Main Menu</p>
           <SidebarLink to="/registrar" icon="📊" active={location.pathname === '/registrar'} onClick={() => setIsMobileMenuOpen(false)}>
-            Dashboard
+            {t('dashboard')}
           </SidebarLink>
           <SidebarLink to="/registrar/approvals" icon="✅" active={location.pathname === '/registrar/approvals'} onClick={() => setIsMobileMenuOpen(false)}>
-            Student Approvals
+            {t('studentApprovals') || 'Student Approvals'}
           </SidebarLink>
           <SidebarLink to="/registrar/rules" icon="📜" active={location.pathname === '/registrar/rules'} onClick={() => setIsMobileMenuOpen(false)}>
-            Academic Rules
+            {t('academicRules') || 'Academic Rules'}
           </SidebarLink>
           <SidebarLink to="/registrar/reports" icon="📈" active={location.pathname === '/registrar/reports'} onClick={() => setIsMobileMenuOpen(false)}>
-            Reports
+            {t('reports')}
           </SidebarLink>
         </nav>
 
@@ -64,8 +64,12 @@ export default function RegistrarDashboard() {
             </div>
           </div>
           <div className="flex gap-2">
-            <button onClick={() => setShowPasswordModal(true)} className="flex-1 text-xs bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 py-2 rounded-lg transition font-medium">Password</button>
-            <button onClick={logout} className="flex-1 text-xs bg-red-50 hover:bg-red-100 text-red-600 py-2 rounded-lg transition font-medium">Logout</button>
+            <button onClick={() => setShowPasswordModal(true)} className="flex-1 text-xs bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 py-2 rounded-lg transition font-medium">
+              {t('password')}
+            </button>
+            <button onClick={logout} className="flex-1 text-xs bg-red-50 hover:bg-red-100 text-red-600 py-2 rounded-lg transition font-medium">
+              {t('logout')}
+            </button>
           </div>
         </div>
       </aside>
@@ -77,12 +81,26 @@ export default function RegistrarDashboard() {
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
             <div>
-              <h1 className="text-xl font-bold text-slate-800">Registrar Dashboard</h1>
-              <p className="text-sm text-slate-500 hidden sm:block">Welcome back, {user?.name}</p>
+              <h1 className="text-xl font-bold text-slate-800">{t('registrarDashboard') || 'Registrar Dashboard'}</h1>
+              <p className="text-sm text-slate-500 hidden sm:block">{t('welcomeBack')}, {user?.name}</p>
             </div>
           </div>
-          <div className="text-sm font-medium text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full hidden sm:block">
-            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+          
+          <div className="flex items-center gap-4">
+            {/* 👇 የቋንቋ መቀያየሪያ ቁልፍ */}
+            <button 
+              onClick={toggleLanguage}
+              className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors font-medium text-sm"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+              </svg>
+              {language === 'en' ? 'አማ' : 'Eng'}
+            </button>
+
+            <div className="text-sm font-medium text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full hidden sm:block">
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+            </div>
           </div>
         </header>
         <div className="p-6 md:p-8 flex-1 overflow-auto">
