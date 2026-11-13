@@ -280,6 +280,12 @@ const translations = {
     penalty3Days: "3 days late: 500 Birr penalty",
     penalty4Days: "4+ days late: Payment blocked",
     saveRules: "Save Rules",
+    classesOverview: "Classes Overview",
+    enrolled: "Enrolled",
+    noClasses: "No classes yet.",
+    teacherPerformance: "Teacher Performance",
+    noTeacherActivity: "No teacher activity yet.",
+    marks: "Marks",
   },
   am: {
     // Dashboard Menu
@@ -561,6 +567,12 @@ const translations = {
     penalty3Days: "3 ቀናት ዘግይቶ፡ 500 ብር ቅጣት",
     penalty4Days: "4+ ቀናት ዘግይቶ፡ ክፍያ ይታገዳል",
     saveRules: "ህጎችን አስቀምጥ",
+    classesOverview: "የክፍሎች አጠቃላይ እይታ",
+    enrolled: "የተመዘገቡ",
+    noClasses: "እስካሁን ምንም ክፍል የለም።",
+    teacherPerformance: "የመምህራን አፈጻጸም",
+    noTeacherActivity: "እስካሁን ምንም የመምህር እንቅስቃሴ የለም።",
+    marks: "ውጤቶች",
   }
 };
 
