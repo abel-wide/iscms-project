@@ -243,6 +243,16 @@ const translations = {
     notifications: "Notifications",
     markAllRead: "Mark all as read",
     noNotifications: "No notifications",
+    registrarDashboard: "Registrar Dashboard",
+    registrarOverviewSubtitle: "Overview of school administration",
+    totalTeachers: "Total Teachers",
+    pendingApprovals: "Pending Approvals",
+    attendanceRecords: "Attendance Records",
+    marksEntered: "Marks Entered",
+    feesCollected: "Fees Collected",
+    recentUsers: "Recent Users",
+    noUsersFound: "No users found.",
+    inactive: "Inactive",
   },
   am: {
     // Dashboard Menu
@@ -487,6 +497,16 @@ const translations = {
     notifications: "ማሳወቂያዎች",
     markAllRead: "ሁሉንም እንደተነበበ ምልክት አድርግ",
     noNotifications: "ምንም ማሳወቂያ የለም",
+    registrarDashboard: "የሬጅስትራር ዳሽቦርድ",
+    registrarOverviewSubtitle: "የትምህርት ቤቱ አስተዳደር አጠቃላይ እይታ",
+    totalTeachers: "ጠቅላላ መምህራን",
+    pendingApprovals: "በመጠባበቅ ላይ ያሉ ማጽደቆች",
+    attendanceRecords: "የክትትል መዝገቦች",
+    marksEntered: "የገቡ ውጤቶች",
+    feesCollected: "የተሰበሰቡ ክፍያዎች",
+    recentUsers: "የቅርብ ጊዜ ተጠቃሚዎች",
+    noUsersFound: "ምንም ተጠቃሚ አልተገኘም።",
+    inactive: "ያልተንቀሳቀሰ",
   }
 };
 
