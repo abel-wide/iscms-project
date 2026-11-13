@@ -286,6 +286,10 @@ const translations = {
     teacherPerformance: "Teacher Performance",
     noTeacherActivity: "No teacher activity yet.",
     marks: "Marks",
+    paidStudents: "Paid Students",
+    pendingStudents: "Pending Students",
+    penaltyStudents: "Students with Penalties",
+    noData: "No data available.",
   },
   am: {
     // Dashboard Menu
@@ -573,6 +577,10 @@ const translations = {
     teacherPerformance: "የመምህራን አፈጻጸም",
     noTeacherActivity: "እስካሁን ምንም የመምህር እንቅስቃሴ የለም።",
     marks: "ውጤቶች",
+    paidStudents: "የከፈሉ ተማሪዎች",
+    pendingStudents: "በመጠባበቅ ላይ ያሉ ተማሪዎች",
+    penaltyStudents: "ቅጣት ያለባቸው ተማሪዎች",
+    noData: "ምንም መረጃ የለም።",
   }
 };
 
