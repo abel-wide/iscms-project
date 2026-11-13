@@ -5,22 +5,17 @@ import ChangePasswordModal from '../components/ChangePasswordModal';
 import { useLanguage } from '../context/useLanguage';
 import NotificationBell from '../components/NotificationBell';
 
-// ... በ Header ውስጥ
-<div className="flex items-center gap-4">
-  <NotificationBell />
-  {/* የቋንቋ ቁልፍ */}
-</div>
-
 export default function RegistrarDashboard() {
   const { user, logout } = useAuth();
   const location = useLocation();
-  const { language, toggleLanguage, t } = useLanguage(); // 👈 አሁን ጥቅም ላይ ይውላሉ
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  // 👇 ይህ መስመር በጣም አስፈላጊ ነው
+  const { language, toggleLanguage, t } = useLanguage();
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
-      {/* Mobile Backdrop */}
       {isMobileMenuOpen && (
         <div 
           className="fixed inset-0 bg-slate-900/50 z-40 md:hidden backdrop-blur-sm" 
@@ -28,7 +23,6 @@ export default function RegistrarDashboard() {
         ></div>
       )}
 
-      {/* Sidebar */}
       <aside className={`
         fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-200 flex flex-col transform transition-all duration-300 ease-in-out shadow-2xl md:shadow-none
         md:relative md:translate-x-0
@@ -52,7 +46,6 @@ export default function RegistrarDashboard() {
         <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-2">
           <p className="px-2 text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Main Menu</p>
           
-          {/* 👇 የሜኑ ቃላት በ t() ተተርጉመዋል */}
           <SidebarLink to="/registrar" icon="📊" active={location.pathname === '/registrar'} onClick={() => setIsMobileMenuOpen(false)}>
             {t('dashboard')}
           </SidebarLink>
@@ -101,7 +94,10 @@ export default function RegistrarDashboard() {
           </div>
           
           <div className="flex items-center gap-4">
-            {/* 👇 የቋንቋ መቀያየሪያ ቁልፍ - አሁን language እና toggleLanguage ጥቅም ላይ ውለዋል */}
+            {/* 👇 የማሳወቂያ ደወል */}
+            <NotificationBell />
+
+            {/* 👇 የቋንቋ መቀያየሪያ ቁልፍ */}
             <button 
               onClick={toggleLanguage}
               className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors font-medium text-sm"

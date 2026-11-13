@@ -5,19 +5,14 @@ import ChangePasswordModal from '../components/ChangePasswordModal';
 import { useLanguage } from '../context/useLanguage'; 
 import NotificationBell from '../components/NotificationBell';
 
-// ... በ Header ውስጥ
-<div className="flex items-center gap-4">
-  <NotificationBell />
-  {/* ... የቋንቋ ቁልፍ */}
-</div>
-
 export default function StudentDashboard() {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  const { language, toggleLanguage, t } = useLanguage(); // 👈 ተጨምሯል
+  // 👇 ይህ መስመር በጣም አስፈላጊ ነው
+  const { language, toggleLanguage, t } = useLanguage(); 
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
@@ -94,6 +89,9 @@ export default function StudentDashboard() {
           </div>
           
           <div className="flex items-center gap-4">
+            {/* 👇 የማሳወቂያ ደወል */}
+            <NotificationBell />
+
             {/* 👇 የቋንቋ መቀያየሪያ ቁልፍ */}
             <button 
               onClick={toggleLanguage}

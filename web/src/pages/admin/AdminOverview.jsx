@@ -47,7 +47,7 @@ export default function AdminOverview() {
           icon="🎓" 
           color="bg-green-500" 
           hoverColor="group-hover:bg-green-600" 
-          linkTo="/admin/students" // 👈 ሲነካ ወደ ተማሪዎች ገጽ ይሄዳል
+          linkTo="/admin/students" 
         />
         <StatCard 
           title="Teachers" 

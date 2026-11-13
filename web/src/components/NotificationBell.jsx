@@ -16,11 +16,12 @@ export default function NotificationBell() {
     const loadNotifications = async () => {
       try {
         const res = await API.get('/notifications/my');
-        if (!cancelled) {
-          const data = res.data.notifications || res.data || [];
-          setNotifications(data);
-          setUnreadCount(data.filter(n => !n.isRead).length);
-        }
+        if (cancelled) return;
+        console.log('Notifications API Response:', res.data); 
+        
+        const data = res.data.notifications || res.data || [];
+        setNotifications(data);
+        setUnreadCount(data.filter(n => !n.isRead).length);
       } catch (err) {
         console.error('Failed to fetch notifications:', err);
       }
@@ -69,7 +70,6 @@ export default function NotificationBell() {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* የማሳወቂያ ደወል */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition"
@@ -84,7 +84,6 @@ export default function NotificationBell() {
         )}
       </button>
 
-      {/* Dropdown */}
       {isOpen && (
         <div className="absolute right-0 mt-2 w-80 md:w-96 bg-white rounded-xl shadow-xl border border-slate-200 z-50">
           <div className="p-4 border-b border-slate-100 flex justify-between items-center">
