@@ -70,15 +70,17 @@ router.get('/report/:studentId/download', protect, async (req, res) => {
       return res.status(404).json({ message: 'Student not found' });
     }
 
-    // የክትትል መረጃ ከዳታቤዝ አምጣ
     const records = await Attendance.find({ studentId: req.params.studentId })
       .sort({ date: -1 })
-      .limit(30); // የመጨረሻዎቹ 30 መዝገቦች
+      .limit(30);
 
     // PDF ፍጠር
     const doc = new PDFDocument();
+    
+    // 👇 ራስጌ አስቀድመህ አዘጋጅ
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="attendance_${student.fullName}.pdf"`);
+    
     doc.pipe(res);
 
     // ርዕስ
@@ -97,10 +99,14 @@ router.get('/report/:studentId/download', protect, async (req, res) => {
     doc.fontSize(12).text('Attendance Records:', { underline: true });
     doc.moveDown(0.5);
 
-    records.forEach((r) => {
-      const dateStr = new Date(r.date).toLocaleDateString();
-      doc.fontSize(10).text(`${dateStr} - ${r.status.toUpperCase()} (${r.classroom?.className || 'N/A'})`);
-    });
+    if (records.length === 0) {
+      doc.fontSize(10).text('No attendance records found.');
+    } else {
+      records.forEach((r) => {
+        const dateStr = new Date(r.date).toLocaleDateString();
+        doc.fontSize(10).text(`${dateStr} - ${r.status.toUpperCase()} (${r.classroom?.className || 'N/A'})`);
+      });
+    }
 
     doc.end();
   } catch (error) {
