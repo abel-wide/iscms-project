@@ -60,7 +60,7 @@ export default function RegistrarOverview() {
           value={stats?.users?.teachers || 0} 
           icon="👨‍🏫"
           color="bg-emerald-50 text-emerald-600 border-emerald-100"
-          linkTo="/admin/teachers"
+          linkTo="/registrar/reports"
           trend="+2%"
         />
         <StatCard 
@@ -68,7 +68,7 @@ export default function RegistrarOverview() {
           value={stats?.academics?.attendanceRate || '94%'} 
           icon="📅"
           color="bg-purple-50 text-purple-600 border-purple-100"
-          linkTo="/admin/attendance"
+          linkTo="/registrar/reports"
           trend="+1%"
         />
         <StatCard 
@@ -76,7 +76,7 @@ export default function RegistrarOverview() {
           value={stats?.academics?.marksEntered || 0} 
           icon="🏆"
           color="bg-amber-50 text-amber-600 border-amber-100"
-          linkTo="/admin/reports"
+          linkTo="/registrar/reports"
           trend="+0%"
         />
       </div>
@@ -91,9 +91,9 @@ export default function RegistrarOverview() {
           </h2>
           <div className="grid grid-cols-2 gap-3">
             <QuickAction to="/registrar/approvals" icon="✅" label={t('approveStudents') || 'Approve Students'} color="bg-blue-50 text-blue-600 hover:bg-blue-100" />
-            <QuickAction to="/admin/users" icon="👥" label={t('manageUsers') || 'Manage Users'} color="bg-emerald-50 text-emerald-600 hover:bg-emerald-100" />
-            <QuickAction to="/admin/classes" icon="🏫" label={t('manageClasses') || 'Manage Classes'} color="bg-purple-50 text-purple-600 hover:bg-purple-100" />
-            <QuickAction to="/admin/reports" icon="📊" label={t('viewReports') || 'View Reports'} color="bg-amber-50 text-amber-600 hover:bg-amber-100" />
+            <QuickAction to="/registrar/approvals" icon="👥" label={t('manageUsers') || 'Manage Users'} color="bg-emerald-50 text-emerald-600 hover:bg-emerald-100" />
+            <QuickAction to="/registrar/classes" icon="🏫" label={t('manageClasses') || 'Manage Classes'} color="bg-purple-50 text-purple-600 hover:bg-purple-100" />
+            <QuickAction to="/registrar/reports" icon="📊" label={t('viewReports') || 'View Reports'} color="bg-amber-50 text-amber-600 hover:bg-amber-100" />
           </div>
         </div>
 
@@ -103,7 +103,7 @@ export default function RegistrarOverview() {
             <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
               👥 {t('recentActivity') || 'Recent Activity'}
             </h2>
-            <Link to="/admin/users" className="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+            <Link to="/registrar/users" className="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
               {t('viewAll') || 'View All'} →
             </Link>
           </div>
