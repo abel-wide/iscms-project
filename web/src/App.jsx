@@ -122,6 +122,7 @@ export default function App() {
             <Route path="approvals" element={<StudentApprovals />} />
             <Route path="rules" element={<AcademicRules />} />
             <Route path="reports" element={<RegistrarReports />} />
+            <Route path="users" element={<StudentApprovals />} />
           </Route>
 
           {/* Parent routes */}

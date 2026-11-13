@@ -8,13 +8,15 @@ export default function StudentApprovals() {
   const [students, setStudents] = useState([]);
   const [message, setMessage] = useState(null);
   const [processingId, setProcessingId] = useState(null);
+  const [filterGrade, setFilterGrade] = useState('all');
 
   useEffect(() => {
     let cancelled = false;
 
     const fetchStudents = async () => {
       try {
-        const res = await API.get('/auth/users?role=student');
+        // 👇 ያልተረጋገጡ ተማሪዎችን ብቻ አምጣ
+        const res = await API.get('/auth/users?role=student&isActive=false');
         if (!cancelled) {
           setStudents(res.data.users || []);
         }
@@ -26,46 +28,46 @@ export default function StudentApprovals() {
     };
 
     fetchStudents();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
   const refresh = async () => {
     try {
-      const res = await API.get('/auth/users?role=student');
+      const res = await API.get('/auth/users?role=student&isActive=false');
       setStudents(res.data.users || []);
     } catch (err) {
       console.error(err);
     }
   };
 
-  const toggleStatus = async (student) => {
+  const handleApprove = async (student) => {
     setProcessingId(student._id);
     try {
-      await API.put(`/auth/users/${student._id}`, {
-        isActive: !student.isActive
-      });
+      await API.put(`/auth/users/${student._id}`, { isActive: true });
       setMessage({
         type: 'success',
-        text: `${student.fullName} ${t('isNow')} ${!student.isActive ? t('active') : t('inactive')}`
+        text: `${student.fullName} ${t('approvedSuccess') || 'has been approved'}`
       });
       refresh();
     } catch (err) {
       setMessage({
         type: 'error',
-        text: err.response?.data?.message || t('failedToUpdate')
+        text: err.response?.data?.message || t('failedToUpdate') || 'Failed to update'
       });
     } finally {
       setProcessingId(null);
     }
   };
 
-  if (loading) {
-    return <div className="text-center py-12 text-gray-500">{t('loading')}</div>;
-  }
+  if (loading) return <div className="text-center py-12 text-gray-500">{t('loading')}</div>;
 
-  const pending = students.filter((s) => !s.isActive);
+  // 👇 በክፍል መሰረት ማጣራት
+  const filteredStudents = filterGrade === 'all' 
+    ? students 
+    : students.filter(s => s.gradeLevel === filterGrade);
+
+  // 👇 ያሉትን የክፍል ደረጃዎች ማውጣት
+  const gradeLevels = ['all', ...new Set(students.map(s => s.gradeLevel).filter(Boolean))];
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -83,15 +85,24 @@ export default function StudentApprovals() {
         </div>
       )}
 
-      {pending.length > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-          <p className="text-sm text-amber-800 font-medium flex items-center gap-2">
-            <span>⚠️</span> {pending.length} {t('studentsPendingApproval') || 'student(s) pending approval'}
-          </p>
-        </div>
-      )}
+      {/* 👇 የክፍል ማጣሪያ */}
+      <div className="flex flex-wrap gap-2">
+        {gradeLevels.map((grade) => (
+          <button
+            key={grade}
+            onClick={() => setFilterGrade(grade)}
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+              filterGrade === grade 
+                ? 'bg-blue-600 text-white shadow-md' 
+                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            {grade === 'all' ? (t('all') || 'All Classes') : grade}
+          </button>
+        ))}
+      </div>
 
-      {/* Table (Responsive) */}
+      {/* Students Table */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
@@ -99,20 +110,19 @@ export default function StudentApprovals() {
               <tr>
                 <th className="px-6 py-4">#</th>
                 <th className="px-6 py-4">{t('student') || 'Student'}</th>
-                <th className="px-6 py-4 hidden md:table-cell">{t('email') || 'Email'}</th>
-                <th className="px-6 py-4 text-center">{t('status') || 'Status'}</th>
+                <th className="px-6 py-4 hidden md:table-cell">{t('gradeLevel') || 'Grade'}</th>
                 <th className="px-6 py-4 text-center">{t('action') || 'Action'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {students.length === 0 ? (
+              {filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
-                    {t('noStudentsFound') || 'No students found.'}
+                  <td colSpan="4" className="px-6 py-12 text-center text-gray-500">
+                    {t('noPendingStudents') || 'No pending students to approve.'}
                   </td>
                 </tr>
               ) : (
-                students.map((s, idx) => (
+                filteredStudents.map((s, idx) => (
                   <tr key={s._id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-4 text-sm text-gray-400">{idx + 1}</td>
                     <td className="px-6 py-4">
@@ -122,31 +132,18 @@ export default function StudentApprovals() {
                         </div>
                         <div>
                           <p className="font-medium text-slate-800 text-sm">{s.fullName}</p>
-                          {/* በሞባይል ላይ ኢሜይል በዚህ ይታያል */}
                           <p className="text-xs text-slate-500 md:hidden">{s.email}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-600 hidden md:table-cell">{s.email}</td>
-                    <td className="px-6 py-4 text-center">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${
-                        s.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
-                      }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${s.isActive ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
-                        {s.isActive ? t('active') : t('pending')}
-                      </span>
-                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-600 hidden md:table-cell">{s.gradeLevel || 'N/A'}</td>
                     <td className="px-6 py-4 text-center">
                       <button
-                        onClick={() => toggleStatus(s)}
+                        onClick={() => handleApprove(s)}
                         disabled={processingId === s._id}
-                        className={`text-xs px-4 py-1.5 rounded-lg font-medium transition-colors disabled:opacity-50 ${
-                          s.isActive
-                            ? 'bg-red-50 text-red-600 hover:bg-red-100'
-                            : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
-                        }`}
+                        className="text-xs px-4 py-1.5 rounded-lg font-medium bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors disabled:opacity-50"
                       >
-                        {processingId === s._id ? '...' : (s.isActive ? t('deactivate') || 'Deactivate' : t('approve') || 'Approve')}
+                        {processingId === s._id ? '...' : (t('approve') || 'Approve')}
                       </button>
                     </td>
                   </tr>

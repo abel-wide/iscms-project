@@ -290,6 +290,8 @@ const translations = {
     pendingStudents: "Pending Students",
     penaltyStudents: "Students with Penalties",
     noData: "No data available.",
+    noPendingStudents: "No pending students to approve.",
+   all: "All Classes",
   },
   am: {
     // Dashboard Menu
@@ -581,6 +583,8 @@ const translations = {
     pendingStudents: "በመጠባበቅ ላይ ያሉ ተማሪዎች",
     penaltyStudents: "ቅጣት ያለባቸው ተማሪዎች",
     noData: "ምንም መረጃ የለም።",
+    noPendingStudents: "ምንም በመጠባበቅ ላይ ያለ ተማሪ የለም።",
+    all: "ሁሉም ክፍሎች",
   }
 };
 
