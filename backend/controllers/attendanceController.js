@@ -1,5 +1,6 @@
 const Attendance = require('../models/Attendance');
 const User = require('../models/User');
+const Notification = require('../models/Notification'); // 👈 ተጨምሯል
 
 // ==========================================
 // 1. MARK ATTENDANCE (Teacher only)
@@ -9,14 +10,12 @@ exports.markAttendance = async (req, res) => {
   try {
     const { studentId, classroomId, date, status, note } = req.body;
 
-    // Validate required fields
     if (!studentId || !classroomId) {
       return res.status(400).json({ 
         message: 'studentId and classroomId are required' 
       });
     }
 
-    // Check student exists
     const student = await User.findById(studentId);
     if (!student || student.role !== 'student') {
       return res.status(404).json({ 
@@ -24,11 +23,9 @@ exports.markAttendance = async (req, res) => {
       });
     }
 
-    // Normalize date to start of day (to prevent duplicate entries)
     const attendanceDate = date ? new Date(date) : new Date();
     attendanceDate.setHours(0, 0, 0, 0);
 
-    // Check for existing record
     const existing = await Attendance.findOne({
       student: studentId,
       date: attendanceDate
@@ -40,7 +37,6 @@ exports.markAttendance = async (req, res) => {
       });
     }
 
-    // Create attendance record
     const attendance = await Attendance.create({
       student: studentId,
       classroom: classroomId,
@@ -50,6 +46,17 @@ exports.markAttendance = async (req, res) => {
       note: note || '',
       markedBy: req.user._id
     });
+
+    // 👇 ማሳወቂያ ፍጠር (ወላጅ ካለ)
+    if (student.parent && status === 'absent') {
+      await Notification.create({
+        recipient: student.parent,
+        title: 'Absence Alert',
+        message: `${student.fullName} was marked absent on ${attendanceDate.toLocaleDateString()}.`,
+        type: 'absence',
+        priority: 'high'
+      });
+    }
 
     res.status(201).json({
       message: 'Attendance marked successfully',
@@ -70,7 +77,6 @@ exports.markAttendance = async (req, res) => {
 exports.markBulkAttendance = async (req, res) => {
   try {
     const { classroomId, date, records } = req.body;
-    // records = [{ studentId, status, note }, ...]
 
     if (!classroomId || !records || !Array.isArray(records)) {
       return res.status(400).json({ 
@@ -96,6 +102,20 @@ exports.markBulkAttendance = async (req, res) => {
           markedBy: req.user._id
         });
         created.push(attendance);
+
+        // 👇 ማሳወቂያ ፍጠር (ወላጅ ካለ እና አልተገኘም ከሆነ)
+        if (record.status === 'absent') {
+          const student = await User.findById(record.studentId);
+          if (student && student.parent) {
+            await Notification.create({
+              recipient: student.parent,
+              title: 'Absence Alert',
+              message: `${student.fullName} was marked absent on ${attendanceDate.toLocaleDateString()}.`,
+              type: 'absence',
+              priority: 'high'
+            });
+          }
+        }
       } catch (err) {
         failed.push({ 
           studentId: record.studentId, 
@@ -126,7 +146,6 @@ exports.getStudentAttendance = async (req, res) => {
     const { studentId } = req.params;
     const { startDate, endDate } = req.query;
 
-    // Build filter
     const filter = { student: studentId };
 
     if (startDate || endDate) {
@@ -135,7 +154,6 @@ exports.getStudentAttendance = async (req, res) => {
       if (endDate) filter.date.$lte = new Date(endDate);
     }
 
-    // Parents can only see their own child
     if (req.user.role === 'parent') {
       const child = await User.findById(studentId);
       if (!child || child.parent?.toString() !== req.user._id.toString()) {
@@ -145,7 +163,6 @@ exports.getStudentAttendance = async (req, res) => {
       }
     }
 
-    // Students can only see their own
     if (req.user.role === 'student' && req.user._id.toString() !== studentId) {
       return res.status(403).json({ 
         message: 'You can only view your own attendance' 
@@ -158,7 +175,6 @@ exports.getStudentAttendance = async (req, res) => {
       .populate('teacher', 'fullName')
       .sort({ date: -1 });
 
-    // Calculate summary
     const summary = {
       total: attendance.length,
       present: attendance.filter(a => a.status === 'present').length,
