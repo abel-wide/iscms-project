@@ -8,9 +8,8 @@ export default function ChildAttendance() {
   const [children, setChildren] = useState([]);
   const [selectedChild, setSelectedChild] = useState(null);
   const [data, setData] = useState(null);
-  
-  // 👇 አዲስ ስቴት ለማጣሪያ (Filter)
   const [filterStatus, setFilterStatus] = useState(null); 
+  const [downloading, setDownloading] = useState(false); // 👈 አዲስ ስቴት ለ PDF
 
   useEffect(() => {
     let cancelled = false;
@@ -31,14 +30,11 @@ export default function ChildAttendance() {
     };
 
     fetchChildren();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
     if (!selectedChild) return;
-
     let cancelled = false;
 
     const fetchData = async () => {
@@ -51,10 +47,42 @@ export default function ChildAttendance() {
     };
 
     fetchData();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [selectedChild]);
+
+const handleDownloadPDF = async () => {
+  if (!selectedChild) return;
+  setDownloading(true);
+  try {
+    const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    const response = await fetch(`${baseURL}/attendance/report/${selectedChild._id}/download`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+    
+    if (!response.ok) {
+      // 👇 ስህተቱን በትክክል አሳይ
+      const errorText = await response.text();
+      throw new Error(errorText || 'Download failed');
+    }
+    
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `attendance_${selectedChild.fullName}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error('PDF download error:', err);
+    alert(t('downloadError') || 'Failed to download PDF. Please try again.');
+  } finally {
+    setDownloading(false);
+  }
+};
 
   if (loading) {
     return <div className="text-center py-12 text-gray-500">{t('loading')}</div>;
@@ -77,14 +105,11 @@ export default function ChildAttendance() {
   const summary = data?.summary || {};
   const records = data?.records || [];
   
-  // 👇 በተመረጠው ሁኔታ መሰረት ማጣራት
   const filteredRecords = filterStatus 
     ? records.filter(r => r.status === filterStatus)
     : records;
 
-  // 👇 ካርዱ ሲነካ ማጣሪያውን የሚቀይር ፈንክሽን
   const handleCardClick = (status) => {
-    // ተመሳሳይ ሁኔታ ከተጫነ ማጣሪያውን አጥፋ (ሁሉንም አሳይ)
     if (filterStatus === status) {
       setFilterStatus(null);
     } else {
@@ -101,17 +126,14 @@ export default function ChildAttendance() {
           <p className="text-sm text-gray-500 mt-1">{t('attendanceHistory') || 'Attendance history'}</p>
         </div>
 
-        {children.length > 1 && (
-          <div className="w-full sm:w-auto">
-            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 sm:hidden">
-              {t('selectChild') || 'Select Child'}
-            </label>
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          {children.length > 1 && (
             <select
               value={selectedChild?._id || ''}
               onChange={(e) => {
                 const c = children.find((k) => k._id === e.target.value);
                 setSelectedChild(c);
-                setFilterStatus(null); // ልጅ ሲቀየር ማጣሪያውን አጽዳ
+                setFilterStatus(null);
               }}
               className="w-full sm:w-48 px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-50 font-medium text-gray-700"
             >
@@ -119,11 +141,32 @@ export default function ChildAttendance() {
                 <option key={c._id} value={c._id}>{c.fullName}</option>
               ))}
             </select>
-          </div>
-        )}
+          )}
+
+          {/* 👇 PDF ማውረጃ ቁልፍ */}
+          <button
+            onClick={handleDownloadPDF}
+            disabled={downloading}
+            className="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white px-4 py-2.5 rounded-xl font-medium transition-colors"
+          >
+            {downloading ? (
+              <>
+                <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                {t('downloading') || 'Downloading...'}
+              </>
+            ) : (
+              <>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                {t('downloadPDF') || 'Download PDF Report'}
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
-      {/* 👇 Summary Grid (Clickable) */}
+      {/* Summary Grid */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
         <SummaryCard 
           label={t('total') || 'Total'} 
@@ -241,7 +284,6 @@ export default function ChildAttendance() {
   );
 }
 
-// 👇 SummaryCard (Clickable & Hover Effect)
 function SummaryCard({ label, value, color, onClick, isActive }) {
   return (
     <button 
@@ -259,7 +301,6 @@ function SummaryCard({ label, value, color, onClick, isActive }) {
   );
 }
 
-// 👇 StatusBadge
 function StatusBadge({ status, t }) {
   const config = {
     present: { bg: 'bg-emerald-100', text: 'text-emerald-700', label: t('present') || 'Present' },
