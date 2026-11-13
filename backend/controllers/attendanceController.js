@@ -1,6 +1,6 @@
 const Attendance = require('../models/Attendance');
 const User = require('../models/User');
-const Notification = require('../models/Notification'); // 👈 ተጨምሯል
+const Notification = require('../models/Notification'); 
 
 // ==========================================
 // 1. MARK ATTENDANCE (Teacher only)
@@ -47,15 +47,27 @@ exports.markAttendance = async (req, res) => {
       markedBy: req.user._id
     });
 
-    // 👇 ማሳወቂያ ፍጠር (ወላጅ ካለ)
-    if (student.parent && status === 'absent') {
+    // 👇 ማሳወቂያ ፍጠር (ለተማሪ እና ለወላጅ)
+    if (status === 'absent') {
+      // ለተማሪ
       await Notification.create({
-        recipient: student.parent,
+        recipient: student._id,
         title: 'Absence Alert',
-        message: `${student.fullName} was marked absent on ${attendanceDate.toLocaleDateString()}.`,
+        message: `You were marked absent on ${attendanceDate.toLocaleDateString()}.`,
         type: 'absence',
         priority: 'high'
       });
+
+      // ለወላጅ (ካለ)
+      if (student.parent) {
+        await Notification.create({
+          recipient: student.parent,
+          title: 'Absence Alert',
+          message: `${student.fullName} was marked absent on ${attendanceDate.toLocaleDateString()}.`,
+          type: 'absence',
+          priority: 'high'
+        });
+      }
     }
 
     res.status(201).json({
@@ -103,17 +115,29 @@ exports.markBulkAttendance = async (req, res) => {
         });
         created.push(attendance);
 
-        // 👇 ማሳወቂያ ፍጠር (ወላጅ ካለ እና አልተገኘም ከሆነ)
+        // 👇 ማሳወቂያ ፍጠር (ለተማሪ እና ለወላጅ)
         if (record.status === 'absent') {
           const student = await User.findById(record.studentId);
-          if (student && student.parent) {
+          if (student) {
+            // ለተማሪ
             await Notification.create({
-              recipient: student.parent,
+              recipient: student._id,
               title: 'Absence Alert',
-              message: `${student.fullName} was marked absent on ${attendanceDate.toLocaleDateString()}.`,
+              message: `You were marked absent on ${attendanceDate.toLocaleDateString()}.`,
               type: 'absence',
               priority: 'high'
             });
+
+            // ለወላጅ (ካለ)
+            if (student.parent) {
+              await Notification.create({
+                recipient: student.parent,
+                title: 'Absence Alert',
+                message: `${student.fullName} was marked absent on ${attendanceDate.toLocaleDateString()}.`,
+                type: 'absence',
+                priority: 'high'
+              });
+            }
           }
         }
       } catch (err) {

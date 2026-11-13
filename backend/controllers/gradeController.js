@@ -1,6 +1,7 @@
 const Mark = require('../models/Mark');
 const User = require('../models/User');
 const Class = require('../models/Class');
+const Notification = require('../models/Notification'); // 👈 ተጨምሯል
 
 // ==========================================
 // HELPER: Letter grade from percentage
@@ -84,6 +85,29 @@ exports.enterMark = async (req, res) => {
       comments: comments || ''
     });
 
+    // 👇 ማሳወቂያ ፍጠር (ለተማሪ እና ለወላጅ)
+    if (student) {
+      // ለተማሪ
+      await Notification.create({
+        recipient: student._id,
+        title: 'New Grade Posted',
+        message: `You received a score of ${score}/${max} in ${subject}.`,
+        type: 'grade',
+        priority: 'normal'
+      });
+
+      // ለወላጅ (ካለ)
+      if (student.parent) {
+        await Notification.create({
+          recipient: student.parent,
+          title: 'Child Grade Posted',
+          message: `${student.fullName} received a score of ${score}/${max} in ${subject}.`,
+          type: 'grade',
+          priority: 'normal'
+        });
+      }
+    }
+
     res.status(201).json({
       message: 'Mark entered successfully',
       mark
@@ -138,6 +162,30 @@ exports.enterBulkMarks = async (req, res) => {
           comments: r.comments || ''
         });
         created.push(mark);
+
+        // 👇 ማሳወቂያ ፍጠር (ለተማሪ እና ለወላጅ)
+        const student = await User.findById(r.studentId);
+        if (student) {
+          // ለተማሪ
+          await Notification.create({
+            recipient: student._id,
+            title: 'New Grade Posted',
+            message: `You received a score of ${r.score}/${maxScore || 100} in ${subject}.`,
+            type: 'grade',
+            priority: 'normal'
+          });
+
+          // ለወላጅ (ካለ)
+          if (student.parent) {
+            await Notification.create({
+              recipient: student.parent,
+              title: 'Child Grade Posted',
+              message: `${student.fullName} received a score of ${r.score}/${maxScore || 100} in ${subject}.`,
+              type: 'grade',
+              priority: 'normal'
+            });
+          }
+        }
       } catch (err) {
         failed.push({
           studentId: r.studentId,
