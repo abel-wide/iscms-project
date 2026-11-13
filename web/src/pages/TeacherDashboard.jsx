@@ -5,18 +5,13 @@ import ChangePasswordModal from '../components/ChangePasswordModal';
 import { useLanguage } from '../context/useLanguage'; 
 import NotificationBell from '../components/NotificationBell';
 
-// ... በ Header ውስጥ
-<div className="flex items-center gap-4">
-  <NotificationBell />
-  {/* ... የቋንቋ ቁልፍ */}
-</div>
-
 export default function TeacherDashboard() {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
+  // 👇 ይህ መስመር በጣም አስፈላጊ ነው
   const { language, toggleLanguage, t } = useLanguage(); 
 
   return (
@@ -37,7 +32,6 @@ export default function TeacherDashboard() {
       `}>
         <div className="h-20 flex items-center px-6 border-b border-slate-100">
           <div className="flex items-center gap-3 w-full">
-            {/* 👇 የመምህር ሎጎ */}
             <div className="w-10 h-10 rounded-xl overflow-hidden shadow-md bg-white p-0.5">
               <img 
                 src="/teacher-logo.png" 
@@ -119,6 +113,9 @@ export default function TeacherDashboard() {
           </div>
           
           <div className="flex items-center gap-4">
+            {/* 👇 የማሳወቂያ ደወል */}
+            <NotificationBell />
+
             {/* 👇 የቋንቋ መቀያየሪያ ቁልፍ */}
             <button 
               onClick={toggleLanguage}

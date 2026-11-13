@@ -9,13 +9,13 @@ export default function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  // 1. Fetch notifications (በ useEffect ውስጥ በተቻለ መጠን ቀጥታ አትጥራ)
+  // 1. Fetch notifications
   useEffect(() => {
     let cancelled = false;
 
     const loadNotifications = async () => {
       try {
-        const res = await API.get('/notifications/my'); // 👈 /my ነው
+        const res = await API.get('/notifications/my');
         if (!cancelled) {
           const data = res.data.notifications || res.data || [];
           setNotifications(data);
@@ -27,7 +27,6 @@ export default function NotificationBell() {
     };
 
     loadNotifications();
-    // 👇 በየ 30 ሰከንዱ አዲስ ማሳወቂያ ካለ ፈልግ
     const interval = setInterval(loadNotifications, 30000);
     return () => {
       cancelled = true;

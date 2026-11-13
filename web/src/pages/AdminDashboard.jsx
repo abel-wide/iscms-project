@@ -2,18 +2,19 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../context/useAuth';
 import ChangePasswordModal from '../components/ChangePasswordModal';
-import { useLanguage } from '../context/useLanguage';
+import { useLanguage } from '../context/useLanguage'; 
+import NotificationBell from '../components/NotificationBell';
 
-export default function AdminDashboard() {
+export default function TeacherDashboard() {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { language, toggleLanguage, t } = useLanguage(); 
+  const { language, toggleLanguage, t } = useLanguage(); // 👈 ይህ መኖሩን አረጋግጥ
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
-      {/* 1. Mobile Backdrop */}
+      {/* Mobile Backdrop */}
       {isMobileMenuOpen && (
         <div 
           className="fixed inset-0 bg-slate-900/50 z-40 md:hidden backdrop-blur-sm"
@@ -21,7 +22,7 @@ export default function AdminDashboard() {
         ></div>
       )}
 
-      {/* 2. Sidebar */}
+      {/* Sidebar */}
       <aside className={`
         fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-200 flex flex-col transform transition-all duration-300 ease-in-out shadow-2xl md:shadow-none
         md:relative md:translate-x-0
@@ -29,16 +30,17 @@ export default function AdminDashboard() {
       `}>
         <div className="h-20 flex items-center px-6 border-b border-slate-100">
           <div className="flex items-center gap-3 w-full">
-             <div className="w-10 h-10 rounded-xl overflow-hidden shadow-md bg-white p-0.5">
+            {/* 👇 የመምህር ሎጎ */}
+            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-md bg-white p-0.5">
               <img 
-                src="/admin-logo.png" 
-                alt="Admin" 
+                src="/teacher-logo.png" 
+                alt="Teacher" 
                 className="w-full h-full object-contain" 
               />
             </div>
             <div>
               <h2 className="text-base font-bold text-slate-800 tracking-tight">Wachemo</h2>
-              <p className="text-xs text-slate-500 font-medium">Admin Portal</p>
+              <p className="text-xs text-slate-500 font-medium">Teacher Portal</p>
             </div>
             <button onClick={() => setIsMobileMenuOpen(false)} className="md:hidden ml-auto text-slate-400 hover:text-slate-600">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -49,37 +51,27 @@ export default function AdminDashboard() {
         <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-2">
           <p className="px-2 text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Main Menu</p>
           
-          <SidebarLink to="/admin" icon={<DashboardIcon />} active={location.pathname === '/admin'} onClick={() => setIsMobileMenuOpen(false)}>
+          <SidebarLink to="/teacher" icon={<DashboardIcon />} active={location.pathname === '/teacher'} onClick={() => setIsMobileMenuOpen(false)}>
             {t('dashboard')}
           </SidebarLink>
-          <SidebarLink to="/admin/users" icon={<UsersIcon />} active={location.pathname === '/admin/users'} onClick={() => setIsMobileMenuOpen(false)}>
-            {t('manageUsers')}
+          <SidebarLink to="/teacher/attendance" icon={<AttendanceIcon />} active={location.pathname === '/teacher/attendance'} onClick={() => setIsMobileMenuOpen(false)}>
+            {t('markAttendance') || 'Mark Attendance'}
           </SidebarLink>
-          <SidebarLink to="/admin/classes" icon={<ClassesIcon />} active={location.pathname === '/admin/classes'} onClick={() => setIsMobileMenuOpen(false)}>
-            {t('manageClasses')}
+          <SidebarLink to="/teacher/grades" icon={<GradesIcon />} active={location.pathname === '/teacher/grades'} onClick={() => setIsMobileMenuOpen(false)}>
+            {t('enterGrades') || 'Enter Grades'}
           </SidebarLink>
-          <SidebarLink to="/admin/reports" icon={<ReportsIcon />} active={location.pathname === '/admin/reports'} onClick={() => setIsMobileMenuOpen(false)}>
-            {t('reports')}
+          <SidebarLink to="/teacher/resources" icon={<ResourcesIcon />} active={location.pathname === '/teacher/resources'} onClick={() => setIsMobileMenuOpen(false)}>
+            {t('uploadResources') || 'Upload Resources'}
           </SidebarLink>
-          <SidebarLink to="/admin/payments" icon={<PaymentsIcon />} active={location.pathname === '/admin/payments'} onClick={() => setIsMobileMenuOpen(false)}>
-            {t('payments')}
+          <SidebarLink to="/teacher/announcements" icon={<AnnouncementsIcon />} active={location.pathname === '/teacher/announcements'} onClick={() => setIsMobileMenuOpen(false)}>
+            {t('classAnnouncements') || 'Class Announcements'}
           </SidebarLink>
-          <SidebarLink to="/admin/announcements" icon={<AnnouncementsIcon />} active={location.pathname === '/admin/announcements'} onClick={() => setIsMobileMenuOpen(false)}>
-            {t('announcements')}
-          </SidebarLink>
-
-          <div className="pt-6 mt-6 border-t border-slate-100">
-            <p className="px-2 text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Settings</p>
-            <SidebarLink to="/admin/settings" icon={<SettingsIcon />} active={location.pathname === '/admin/settings'} onClick={() => setIsMobileMenuOpen(false)}>
-              {t('settings')}
-            </SidebarLink>
-          </div>
         </nav>
 
         <div className="p-4 border-t border-slate-100">
           <div className="bg-slate-50 rounded-xl p-4 flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
-              {user?.name?.charAt(0) || 'A'}
+            <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold">
+              {user?.name?.charAt(0) || 'T'}
             </div>
             <div className="overflow-hidden">
               <p className="text-sm font-semibold text-slate-800 truncate">{user?.name}</p>
@@ -103,25 +95,26 @@ export default function AdminDashboard() {
         </div>
       </aside>
 
-      {/* 3. Main Content Area */}
+      {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0">
         <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 h-20 px-6 md:px-8 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setIsMobileMenuOpen(true)}
-              className="md:hidden text-slate-600 hover:text-indigo-600 p-2 rounded-lg hover:bg-slate-100 transition"
+              className="md:hidden text-slate-600 hover:text-emerald-600 p-2 rounded-lg hover:bg-slate-100 transition"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
             <div>
-              <h1 className="text-xl font-bold text-slate-800">{t('dashboard')}</h1>
-              <p className="text-sm text-slate-500 hidden sm:block">
-                  {t('welcomeBack')}, {user?.name}
-                </p>
+              <h1 className="text-xl font-bold text-slate-800">{t('teacherDashboard') || 'Teacher Dashboard'}</h1>
+              <p className="text-sm text-slate-500 hidden sm:block">{t('welcomeBack')}, {user?.name}</p>
             </div>
           </div>
           
           <div className="flex items-center gap-4">
+            {/* 👇 የማሳወቂያ ደወል */}
+            <NotificationBell />
+
             {/* 👇 የቋንቋ መቀያየሪያ ቁልፍ */}
             <button 
               onClick={toggleLanguage}
@@ -160,41 +153,35 @@ function SidebarLink({ to, icon, children, active, onClick }) {
       className={`
         group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
         ${active 
-          ? 'bg-indigo-50 text-indigo-700 shadow-sm border border-indigo-100' 
+          ? 'bg-emerald-50 text-emerald-700 shadow-sm border border-emerald-100' 
           : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 border border-transparent'
         }
       `}
     >
-      <div className={`transition-colors ${active ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-600'}`}>
+      <div className={`transition-colors ${active ? 'text-emerald-600' : 'text-slate-400 group-hover:text-slate-600'}`}>
         {icon}
       </div>
       <span>{children}</span>
       {active && (
-        <div className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-600"></div>
+        <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-600"></div>
       )}
     </Link>
   );
 }
 
-// --- የ SVG አዶዎች ---
+// --- Icons ---
 function DashboardIcon() {
   return <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>;
 }
-function UsersIcon() {
-  return <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>;
+function AttendanceIcon() {
+  return <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>;
 }
-function ClassesIcon() {
-  return <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>;
+function GradesIcon() {
+  return <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>;
 }
-function ReportsIcon() {
-  return <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>;
-}
-function PaymentsIcon() {
-  return <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>;
+function ResourcesIcon() {
+  return <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>;
 }
 function AnnouncementsIcon() {
   return <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg>;
-}
-function SettingsIcon() {
-  return <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>;
 }
