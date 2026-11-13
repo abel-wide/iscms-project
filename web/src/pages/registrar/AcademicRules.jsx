@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { useLanguage } from '../../context/useLanguage';
 
 export default function AcademicRules() {
+  const { t } = useLanguage();
   const [message, setMessage] = useState(null);
   const [rules, setRules] = useState({
     minimumAttendance: 75,
@@ -21,82 +23,79 @@ export default function AcademicRules() {
     // For now, just show success
     setMessage({
       type: 'success',
-      text: 'Academic rules saved (locally for this session)'
+      text: t('rulesSavedLocally') || 'Academic rules saved (locally for this session)'
     });
   };
 
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Academic Rules</h1>
+    <div className="max-w-5xl mx-auto space-y-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-gray-800">{t('academicRules') || 'Academic Rules'}</h1>
         <p className="text-sm text-gray-500 mt-1">
-          Configure attendance thresholds and grading policies
+          {t('academicRulesSubtitle') || 'Configure attendance thresholds and grading policies'}
         </p>
       </div>
 
       {message && (
-        <div
-          className={`mb-4 px-4 py-3 rounded-lg ${
-            message.type === 'success'
-              ? 'bg-green-50 text-green-700 border border-green-200'
-              : 'bg-red-50 text-red-700 border border-red-200'
-          }`}
-        >
+        <div className={`px-4 py-3 rounded-xl border ${
+          message.type === 'success' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'
+        }`}>
           {message.text}
         </div>
       )}
 
       <form onSubmit={handleSave} className="space-y-6">
         {/* Attendance Rules */}
-        <section className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-bold text-gray-800 mb-4">📅 Attendance Rules</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <section className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+          <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <span>📅</span> {t('attendanceRules') || 'Attendance Rules'}
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Minimum Attendance Rate (%)
+                {t('minimumAttendance') || 'Minimum Attendance Rate (%)'}
               </label>
               <input
                 type="number"
                 min="0"
                 max="100"
                 value={rules.minimumAttendance}
-                onChange={(e) =>
-                  setRules({ ...rules, minimumAttendance: Number(e.target.value) })
-                }
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                onChange={(e) => setRules({ ...rules, minimumAttendance: Number(e.target.value) })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Students below this rate will be flagged
+                {t('minAttendanceHint') || 'Students below this rate will be flagged'}
               </p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Maximum Absences per Term
+                {t('maxAbsences') || 'Maximum Absences per Term'}
               </label>
               <input
                 type="number"
                 min="0"
                 value={rules.maxAbsences}
-                onChange={(e) =>
-                  setRules({ ...rules, maxAbsences: Number(e.target.value) })
-                }
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                onChange={(e) => setRules({ ...rules, maxAbsences: Number(e.target.value) })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
               />
               <p className="text-xs text-gray-500 mt-1">
-                After this, students are marked as "at risk"
+                {t('maxAbsencesHint') || 'After this, students are marked as "at risk"'}
               </p>
             </div>
           </div>
         </section>
 
         {/* Grading Rules */}
-        <section className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-bold text-gray-800 mb-4">📝 Grading Rules</h2>
+        <section className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+          <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <span>📝</span> {t('gradingRules') || 'Grading Rules'}
+          </h2>
 
-          <div className="mb-4">
+          <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Pass Mark (%)
+              {t('passMark') || 'Pass Mark (%)'}
             </label>
             <input
               type="number"
@@ -104,23 +103,18 @@ export default function AcademicRules() {
               max="100"
               value={rules.passMark}
               onChange={(e) => setRules({ ...rules, passMark: Number(e.target.value) })}
-              className="w-full md:w-64 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+              className="w-full md:w-64 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Grade Boundaries
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              {t('gradeBoundaries') || 'Grade Boundaries'}
             </label>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
               {['A', 'B', 'C', 'D', 'F'].map((grade) => (
-                <div
-                  key={grade}
-                  className="bg-gray-50 p-3 rounded-lg text-center"
-                >
-                  <div className="text-2xl font-bold text-gray-800 mb-1">
-                    {grade}
-                  </div>
+                <div key={grade} className="bg-slate-50 p-4 rounded-xl text-center border border-slate-100">
+                  <div className="text-2xl font-bold text-gray-800 mb-2">{grade}</div>
                   <input
                     type="number"
                     min="0"
@@ -135,9 +129,9 @@ export default function AcademicRules() {
                         }
                       })
                     }
-                    className="w-full text-center px-2 py-1 border rounded focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="w-full text-center px-2 py-1.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold"
                   />
-                  <div className="text-xs text-gray-500 mt-1">% minimum</div>
+                  <div className="text-xs text-gray-500 mt-1">{t('minPercent') || '% minimum'}</div>
                 </div>
               ))}
             </div>
@@ -145,19 +139,20 @@ export default function AcademicRules() {
         </section>
 
         {/* Payment Rules */}
-        <section className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-bold text-gray-800 mb-4">💰 Payment Rules</h2>
-          <div className="bg-gray-50 p-4 rounded-lg">
+        <section className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+          <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <span>💰</span> {t('paymentRules') || 'Payment Rules'}
+          </h2>
+          <div className="bg-slate-50 p-5 rounded-xl border border-slate-100">
             <p className="text-sm text-gray-700 mb-3">
-              Current payment deadlines are managed by <strong>Admins</strong> in the
-              Payments page.
+              {t('paymentRulesNote') || 'Current payment deadlines are managed by Admins in the Payments page.'}
             </p>
-            <ul className="text-sm text-gray-600 space-y-1">
-              <li>• Base fee: Set per class by admin</li>
-              <li>• 1 day late: 100 Birr penalty</li>
-              <li>• 2 days late: 300 Birr penalty</li>
-              <li>• 3 days late: 500 Birr penalty</li>
-              <li>• 4+ days late: Payment blocked</li>
+            <ul className="text-sm text-gray-600 space-y-2">
+              <li className="flex items-center gap-2">• {t('baseFeeNote') || 'Base fee: Set per class by admin'}</li>
+              <li className="flex items-center gap-2">• {t('penalty1Day') || '1 day late: 100 Birr penalty'}</li>
+              <li className="flex items-center gap-2">• {t('penalty2Days') || '2 days late: 300 Birr penalty'}</li>
+              <li className="flex items-center gap-2">• {t('penalty3Days') || '3 days late: 500 Birr penalty'}</li>
+              <li className="flex items-center gap-2">• {t('penalty4Days') || '4+ days late: Payment blocked'}</li>
             </ul>
           </div>
         </section>
@@ -165,9 +160,9 @@ export default function AcademicRules() {
         <div className="flex justify-end">
           <button
             type="submit"
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg"
+            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-8 py-2.5 rounded-xl font-medium transition-colors"
           >
-            Save Rules
+            {t('saveRules') || 'Save Rules'}
           </button>
         </div>
       </form>
