@@ -1,4 +1,4 @@
-/* eslint-disable react-refresh/only-export-components*/ 
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useState } from 'react';
 
 const translations = {
@@ -82,7 +82,7 @@ const translations = {
     homeroomTeacher: "HOMEROOM TEACHER",
     assigned: "Assigned",
 
-    //teacher
+    // Teacher
     teacherDashboard: "Teacher Dashboard",
     teacherOverviewSubtitle: "Overview of your classes and activities",
     myClasses: "My Classes",
@@ -140,7 +140,6 @@ const translations = {
     uploadResourcesSubtitle: "Share PDFs, videos, and links with your students",
     searchClass: "Search class...",
     selectFileError: "Please select a file to upload.",
-    // Messages
     successClassCreated: "Class created successfully",
     errorClassCreate: "Failed to create class",
     successTeacherAssigned: "Teacher assigned successfully",
@@ -185,7 +184,7 @@ const translations = {
     selectClassToStart: "Select a class to start marking attendance.",
     saveAttendance: "Save Attendance",
 
-    // parent
+    // Parent
     parentDashboard: "Parent Dashboard",
     childGrades: "Child's Grades",
     childAttendance: "Child's Attendance",
@@ -206,7 +205,7 @@ const translations = {
     paid: "Paid",
     pending: "Pending",
     overdue: "Overdue",
-    payment:"History",
+    payment: "Payment History",
     allPaymentRecords: "All payment records",
     paidCount: "Paid Count",
     paymentRecords: "Payment Records",
@@ -236,11 +235,14 @@ const translations = {
     downloadError: "Failed to download PDF. Please try again.",
     downloadPDF: "Download PDF Report",
     downloading: "Downloading...",
-    academicPerformance: "የትምህርት አፈጻጸም አጠቃላይ እይታ",
-    downloadReportCard: "የውጤት ካርድ አውርድ",
-    subjectAverages: "የትምህርት አማካዮች",
-    allAssessments: "ሁሉም ግምገማዎች",
-    assessments: "ግምገማ(ዎች)",
+    academicPerformance: "Academic performance overview",
+    downloadReportCard: "Download Report Card",
+    subjectAverages: "Subject Averages",
+    allAssessments: "All Assessments",
+    assessments: "assessment(s)",
+    notifications: "Notifications",
+    markAllRead: "Mark all as read",
+    noNotifications: "No notifications",
   },
   am: {
     // Dashboard Menu
@@ -322,7 +324,7 @@ const translations = {
     homeroomTeacher: "የክፍል መምህር",
     assigned: "ተመድቧል",
 
-    //teacher
+    // Teacher
     teacherDashboard: "የመምህር ዳሽቦርድ",
     teacherOverviewSubtitle: "የክፍሎችዎ እና እንቅስቃሴዎችዎ አጠቃላይ እይታ",
     myClasses: "የእኔ ክፍሎች",
@@ -425,12 +427,13 @@ const translations = {
     confirmRemoveStudent: "ይህን ተማሪ ከክፍሉ ማስወገድ ይፈልጋሉ?",
     confirmDeleteClass: "ይህን ክፍል መሰረዝ ይፈልጋሉ? ይህ ተግባር መመለስ አይቻልም።",
     welcomeBack: "እንኳን ደህና መጡ",
+
+    // Parent
     parentDashboard: "የወላጅ ዳሽቦርድ",
     childGrades: "የልጅ ውጤቶች",
     childAttendance: "የልጅ ክትትል",
     paymentHistory: "የክፍያ ታሪክ",
     password: "ፓስወርድ",
-  // parent
     parentOverviewSubtitle: "የልጅዎ የትምህርት እድገት አጠቃላይ እይታ",
     noChildrenLinked: "ከመለያዎ ጋር የተገናኘ ልጅ የለም",
     contactAdminLinkChild: "እባክዎ የልጅዎን መለያ ለማገናኘት የትምህርት ቤቱን አስተዳዳሪ ያግኙ።",
@@ -446,6 +449,7 @@ const translations = {
     paid: "ተከፍሏል",
     pending: "በመጠባበቅ ላይ",
     overdue: "ጊዜው ያለፈበት",
+    payment: "የክፍያ ታሪክ",
     allPaymentRecords: "ሁሉም የክፍያ መዝገቦች",
     paidCount: "የተከፈሉ ብዛት",
     paymentRecords: "የክፍያ መዝገቦች",
@@ -453,6 +457,7 @@ const translations = {
     period: "ወቅት",
     amount: "መጠን",
     penalty: "ቅጣት",
+    makePayment: "ክፍያ ይፈጽሙ",
     makePaymentSubtitle: "ለልጅዎ የትምህርት ቤት ክፍያን በChapa በአስተማማኝ ሁኔታ ይክፈሉ",
     fetchStatusError: "የክፍያ ሁኔታን ማምጣት አልተቻለም",
     paymentInitiationError: "የክፍያ ሂደት ማስጀመር አልተቻለም",
@@ -479,7 +484,9 @@ const translations = {
     subjectAverages: "የትምህርት አማካዮች",
     allAssessments: "ሁሉም ግምገማዎች",
     assessments: "ግምገማ(ዎች)",
-
+    notifications: "ማሳወቂያዎች",
+    markAllRead: "ሁሉንም እንደተነበበ ምልክት አድርግ",
+    noNotifications: "ምንም ማሳወቂያ የለም",
   }
 };
 
@@ -491,7 +498,6 @@ export function LanguageProvider({ children }) {
     setLanguage((prev) => (prev === 'en' ? 'am' : 'en'));
   };
 
-  // ቃላቱን በቀላሉ ለመጥራት የሚያገለግል function (t = translate)
   const t = (key) => {
     return translations[language][key] || key;
   };
