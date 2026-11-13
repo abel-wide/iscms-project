@@ -258,6 +258,10 @@ const translations = {
     approveStudents: "Approve Students",
     viewReports: "View Reports",
     viewAll: "View All",
+    isNow: "is now",
+    failedToUpdate: "Failed to update",
+    studentsPendingApproval: "student(s) pending approval",
+    deactivate: "Deactivate",
   },
   am: {
     // Dashboard Menu
@@ -517,6 +521,10 @@ const translations = {
     approveStudents: "ተማሪዎችን አጽድቅ",
     viewReports: "ሪፖርቶችን ተመልከት",
     viewAll: "ሁሉንም አሳይ",
+    isNow: "አሁን",
+    failedToUpdate: "ማስተካከል አልተቻለም",
+    studentsPendingApproval: "ተማሪ(ዎች) በመጠባበቅ ላይ",
+    deactivate: "አቦዝን",
   }
 };
 
