@@ -2,10 +2,12 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../context/useAuth';
 import ChangePasswordModal from '../components/ChangePasswordModal';
+import { useLanguage } from '../context/useLanguage';
 
 export default function RegistrarDashboard() {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const { language, toggleLanguage, t } = useLanguage();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 

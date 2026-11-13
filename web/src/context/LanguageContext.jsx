@@ -253,6 +253,11 @@ const translations = {
     recentUsers: "Recent Users",
     noUsersFound: "No users found.",
     inactive: "Inactive",
+    quickActions: "Quick Actions",
+    recentActivity: "Recent Activity",
+    approveStudents: "Approve Students",
+    viewReports: "View Reports",
+    viewAll: "View All",
   },
   am: {
     // Dashboard Menu
@@ -507,6 +512,11 @@ const translations = {
     recentUsers: "የቅርብ ጊዜ ተጠቃሚዎች",
     noUsersFound: "ምንም ተጠቃሚ አልተገኘም።",
     inactive: "ያልተንቀሳቀሰ",
+    quickActions: "ፈጣን ተግባራት",
+    recentActivity: "የቅርብ ጊዜ እንቅስቃሴ",
+    approveStudents: "ተማሪዎችን አጽድቅ",
+    viewReports: "ሪፖርቶችን ተመልከት",
+    viewAll: "ሁሉንም አሳይ",
   }
 };
 
