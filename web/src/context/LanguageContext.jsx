@@ -236,6 +236,11 @@ const translations = {
     downloadError: "Failed to download PDF. Please try again.",
     downloadPDF: "Download PDF Report",
     downloading: "Downloading...",
+    academicPerformance: "የትምህርት አፈጻጸም አጠቃላይ እይታ",
+    downloadReportCard: "የውጤት ካርድ አውርድ",
+    subjectAverages: "የትምህርት አማካዮች",
+    allAssessments: "ሁሉም ግምገማዎች",
+    assessments: "ግምገማ(ዎች)",
   },
   am: {
     // Dashboard Menu
@@ -469,6 +474,12 @@ const translations = {
     downloadError: "PDF ማውረድ አልተቻለም። እባክዎ እንደገና ይሞክሩ።",
     downloadPDF: "PDF ሪፖርት አውርድ",
     downloading: "በማውረድ ላይ...",
+    academicPerformance: "የትምህርት አፈጻጸም አጠቃላይ እይታ",
+    downloadReportCard: "የውጤት ካርድ አውርድ",
+    subjectAverages: "የትምህርት አማካዮች",
+    allAssessments: "ሁሉም ግምገማዎች",
+    assessments: "ግምገማ(ዎች)",
+
   }
 };
 
