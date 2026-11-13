@@ -2,7 +2,14 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../context/useAuth';
 import ChangePasswordModal from '../components/ChangePasswordModal';
-import { useLanguage } from '../context/useLanguage'; // 👈 ተጨምሯል
+import { useLanguage } from '../context/useLanguage'; 
+import NotificationBell from '../components/NotificationBell';
+
+// ... በ Header ውስጥ
+<div className="flex items-center gap-4">
+  <NotificationBell />
+  {/* ... የቋንቋ ቁልፍ */}
+</div>
 
 export default function TeacherDashboard() {
   const { user, logout } = useAuth();
@@ -10,7 +17,7 @@ export default function TeacherDashboard() {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  const { language, toggleLanguage, t } = useLanguage(); // 👈 ተጨምሯል
+  const { language, toggleLanguage, t } = useLanguage(); 
 
   return (
     <div className="min-h-screen bg-slate-50 flex">

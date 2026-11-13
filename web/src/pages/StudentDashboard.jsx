@@ -2,7 +2,14 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../context/useAuth';
 import ChangePasswordModal from '../components/ChangePasswordModal';
-import { useLanguage } from '../context/useLanguage'; // 👈 ተጨምሯል
+import { useLanguage } from '../context/useLanguage'; 
+import NotificationBell from '../components/NotificationBell';
+
+// ... በ Header ውስጥ
+<div className="flex items-center gap-4">
+  <NotificationBell />
+  {/* ... የቋንቋ ቁልፍ */}
+</div>
 
 export default function StudentDashboard() {
   const { user, logout } = useAuth();
