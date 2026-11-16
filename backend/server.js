@@ -22,14 +22,14 @@ const app = express();
 // 👇 የደህንነት ማሻሻያዎች (Security Middleware)
 // ==========================================
 app.use(helmet()); // የ HTTP ራስጌዎችን ይጠብቃል
-app.use(mongoSanitize()); // የ NoSQL Injection ይከላከላል
-
 
 // CORS ሴቲንግ
 const allowedOrigins = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
-  'https://iscms-project.vercel.app'
+  'https://iscms-project.vercel.app',
+  'https://localhost',
+  'capacitor://localhost'
 ];
 
 app.use(cors({
@@ -44,6 +44,23 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+// 👇 Express 5 Safe NoSQL Injection Sanitizer
+// req.body, req.params እና req.query ውስጥ ያሉትን የ NoSQL አደገኛ ኦፕሬተሮች ($ እና .) ያጸዳል
+app.use((req, res, next) => {
+  if (req.body) mongoSanitize.sanitize(req.body);
+  if (req.params) mongoSanitize.sanitize(req.params);
+  if (req.query) {
+    for (const key in req.query) {
+      if (key.startsWith('$') || key.includes('.')) {
+        delete req.query[key];
+      } else if (typeof req.query[key] === 'object' && req.query[key] !== null) {
+        mongoSanitize.sanitize(req.query[key]);
+      }
+    }
+  }
+  next();
+});
 
 // 👇 የ uploads ፎልደርን ለህዝብ ክፍት ማድረግ (ፋይሎች እንዲታዩ)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
