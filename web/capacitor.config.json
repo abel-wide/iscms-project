@@ -1,0 +1,20 @@
+{
+  "appId": "com.wachemo.iscms",
+  "appName": "ISCMS",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  },
+  "plugins": {
+    "Keyboard": {
+      "resize": "body",
+      "style": "dark",
+      "resizeOnFullScreen": true
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#4f46e5"
+    }
+  }
+}
