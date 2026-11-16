@@ -1,7 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const path = require('path'); // 👈 ተጨምሯል
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const path = require('path'); 
 const authRoutes = require('./routes/authRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
 const classRoutes = require('./routes/classRoutes');
@@ -15,6 +17,13 @@ const userRoutes = require('./routes/userRoutes');
 require('dotenv').config();
 
 const app = express();
+
+// ==========================================
+// 👇 የደህንነት ማሻሻያዎች (Security Middleware)
+// ==========================================
+app.use(helmet()); // የ HTTP ራስጌዎችን ይጠብቃል
+app.use(mongoSanitize()); // የ NoSQL Injection ይከላከላል
+
 
 // CORS ሴቲንግ
 const allowedOrigins = [
