@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ISCMS</string>
+    <string name="title_activity_main">ISCMS</string>
+    <string name="package_name">com.wachemo.iscms</string>
+    <string name="custom_url_scheme">com.wachemo.iscms</string>
+</resources>
