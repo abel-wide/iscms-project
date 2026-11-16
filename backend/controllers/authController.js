@@ -5,6 +5,19 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
 // ==========================================
+// 👇 የፓስወርድ ጥንካሬ መፈተሻ
+// ==========================================
+const validatePasswordStrength = (password) => {
+  const errors = [];
+  if (password.length < 8) errors.push('At least 8 characters');
+  if (!/[A-Z]/.test(password)) errors.push('At least one uppercase letter');
+  if (!/[a-z]/.test(password)) errors.push('At least one lowercase letter');
+  if (!/[0-9]/.test(password)) errors.push('At least one number');
+  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) errors.push('At least one special character');
+  return errors;
+};
+
+// ==========================================
 // REGISTER NEW USER
 // POST /api/auth/register
 // ==========================================
@@ -32,6 +45,15 @@ exports.register = async (req, res) => {
     if (role === 'student' && !gradeLevel) {
       return res.status(400).json({
         message: 'Grade level is required for students'
+      });
+    }
+
+    // 👇 የፓስወርድ ጥንካሬ አረጋግጥ
+    const passwordErrors = validatePasswordStrength(password);
+    if (passwordErrors.length > 0) {
+      return res.status(400).json({
+        message: 'Password is not strong enough',
+        errors: passwordErrors
       });
     }
 
@@ -78,14 +100,44 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
+    // 👇 አካውንቱ መዘጋቱን አረጋግጥ (Account Lockout)
+    if (user.lockUntil && user.lockUntil > Date.now()) {
+      const minutesLeft = Math.ceil((user.lockUntil - Date.now()) / 60000);
+      return res.status(403).json({
+        message: `Account is locked. Try again in ${minutesLeft} minute(s).`
+      });
+    }
+
     if (!user.isActive) {
       return res.status(403).json({ message: 'Account is deactivated' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
+    
     if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+      // 👇 የተሳሳተ ሙከራ ቁጥርን ጨምር
+      user.loginAttempts = (user.loginAttempts || 0) + 1;
+
+      // 👇 5 ጊዜ ከሞከረ አካውንቱን ቆልፍ (30 ደቂቃ)
+      if (user.loginAttempts >= 5) {
+        user.lockUntil = Date.now() + 30 * 60 * 1000; // 30 ደቂቃ
+        await user.save();
+        
+        return res.status(403).json({
+          message: 'Too many failed attempts! Account locked for 30 minutes.'
+        });
+      }
+
+      await user.save();
+      return res.status(400).json({ 
+        message: `Invalid credentials. ${5 - user.loginAttempts} attempt(s) remaining.` 
+      });
     }
+
+    // 👇 ስኬታማ ከሆነ ሙከራዎችን አጥፋ
+    user.loginAttempts = 0;
+    user.lockUntil = null;
+    await user.save();
 
     const token = jwt.sign(
       { userId: user._id, role: user.role },
@@ -180,13 +232,21 @@ exports.updateUser = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const fields = ['fullName', 'email', 'role', 'isActive'];
+    const fields = ['fullName', 'email', 'role', 'isActive', 'gradeLevel'];
 
     fields.forEach((f) => {
       if (req.body[f] !== undefined) user[f] = req.body[f];
     });
 
     if (req.body.password) {
+      // 👇 አዲስ ፓስወርድ ከሆነ ጥንካሬውን አረጋግጥ
+      const passwordErrors = validatePasswordStrength(req.body.password);
+      if (passwordErrors.length > 0) {
+        return res.status(400).json({
+          message: 'Password is not strong enough',
+          errors: passwordErrors
+        });
+      }
       user.password = await bcrypt.hash(req.body.password, 10);
     }
 
@@ -199,7 +259,8 @@ exports.updateUser = async (req, res) => {
         fullName: user.fullName,
         email: user.email,
         role: user.role,
-        isActive: user.isActive
+        isActive: user.isActive,
+        gradeLevel: user.gradeLevel
       }
     });
   } catch (error) {
@@ -336,6 +397,7 @@ exports.getMyChildren = async (req, res) => {
     });
   }
 };
+
 // ==========================================
 // CHANGE OWN PASSWORD (Any logged-in user)
 // PUT /api/auth/change-password
@@ -350,9 +412,12 @@ exports.changePassword = async (req, res) => {
       });
     }
 
-    if (newPassword.length < 6) {
+    // 👇 አዲሱ ፓስወርድ ጥንካሬውን አረጋግጥ
+    const passwordErrors = validatePasswordStrength(newPassword);
+    if (passwordErrors.length > 0) {
       return res.status(400).json({
-        message: 'New password must be at least 6 characters'
+        message: 'Password is not strong enough',
+        errors: passwordErrors
       });
     }
 
@@ -383,6 +448,7 @@ exports.changePassword = async (req, res) => {
     });
   }
 };
+
 // ==========================================
 // FORGOT PASSWORD (Send Email)
 // POST /api/auth/forgot-password
@@ -433,7 +499,7 @@ exports.forgotPassword = async (req, res) => {
     // Send email
     await transporter.sendMail({
       from: `"ISCMS Support" <${process.env.EMAIL_USER}>`,
-      to: '${user.email}, ${process.env.EMAIL_USER}',
+      to: user.email,
       subject: 'ISCMS - Password Reset Request',
       html: message
     });
@@ -469,8 +535,17 @@ exports.resetPassword = async (req, res) => {
     const { token } = req.params;
     const { password } = req.body;
 
-    if (!password || password.length < 6) {
-      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    if (!password) {
+      return res.status(400).json({ message: 'Password is required' });
+    }
+
+    // 👇 አዲሱ ፓስወርድ ጥንካሬውን አረጋግጥ
+    const passwordErrors = validatePasswordStrength(password);
+    if (passwordErrors.length > 0) {
+      return res.status(400).json({
+        message: 'Password is not strong enough',
+        errors: passwordErrors
+      });
     }
 
     // Hash the token from URL to match DB
