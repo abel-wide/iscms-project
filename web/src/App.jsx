@@ -43,11 +43,18 @@ import ChildAttendance from './pages/parent/ChildAttendance';
 import MakePayment from './pages/parent/MakePayment';
 import PaymentHistory from './pages/parent/PaymentHistory';
 import PaymentCallback from './pages/parent/PaymentCallback';
+import { useMobileApp } from './hooks/useMobileApp';
+
+function MobileAppHandler() {
+  useMobileApp();
+  return null;
+}
 
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <MobileAppHandler />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
