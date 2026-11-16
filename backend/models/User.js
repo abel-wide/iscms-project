@@ -22,12 +22,24 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: null
   },
+  
   gradeLevel: { 
     type: String, 
     enum: ['KG', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8'],
     required: function() { return this.role === 'student'; } 
   },
-  isActive: { type: Boolean, default: true }
+  isActive: { type: Boolean, default: true },
+
+  // 👇 ለ Account Lockout (የብሉት ፎርስ መከላከያ)
+  loginAttempts: { 
+    type: Number, 
+    required: true, 
+    default: 0 
+  },
+  lockUntil: { 
+    type: Date, 
+    default: null 
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);
