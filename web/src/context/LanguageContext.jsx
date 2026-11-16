@@ -291,7 +291,17 @@ const translations = {
     penaltyStudents: "Students with Penalties",
     noData: "No data available.",
     noPendingStudents: "No pending students to approve.",
-   all: "All Classes",
+    all: "All Classes",
+    createAccount: "Create Account",
+    fullName: "Full Name",
+    iAmA: "I am a...",
+    searchGrade: "Search grade...",
+    atLeast8Chars: "At least 8 characters",
+    passwordStrength: "Password must contain at least: 8 characters, 1 uppercase, 1 lowercase, 1 number, and 1 special character",
+    passwordsMatch: "Passwords match",
+    passwordsDoNotMatch: "Passwords do not match",
+    continueWithGoogle: "Continue with Google",
+    or: "Or",
   },
   am: {
     // Dashboard Menu
@@ -585,6 +595,16 @@ const translations = {
     noData: "ምንም መረጃ የለም።",
     noPendingStudents: "ምንም በመጠባበቅ ላይ ያለ ተማሪ የለም።",
     all: "ሁሉም ክፍሎች",
+    createAccount: "መለያ ይፍጠሩ",
+    fullName: "ሙሉ ስም",
+    iAmA: "እኔ...",
+    searchGrade: "ክፍል ይፈልጉ...",
+    atLeast8Chars: "ቢያንስ 8 ፊደል",
+    passwordStrength: "ፓስወርድ ቢያንስ 8 ፊደል፣ 1 ትልቅ ፊደል፣ 1 ትንሽ ፊደል፣ 1 ቁጥር እና 1 ልዩ ምልክት መያዝ አለበት",
+    passwordsMatch: "ፓስወርዶች ተመሳስለዋል",
+    passwordsDoNotMatch: "ፓስወርዶች አልተመሳሰሉም",
+    continueWithGoogle: "በGoogle ይቀጥሉ",
+    or: "ወይም",
   }
 };
 
