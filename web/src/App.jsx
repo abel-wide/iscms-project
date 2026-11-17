@@ -43,6 +43,7 @@ import ChildAttendance from './pages/parent/ChildAttendance';
 import MakePayment from './pages/parent/MakePayment';
 import PaymentHistory from './pages/parent/PaymentHistory';
 import PaymentCallback from './pages/parent/PaymentCallback';
+import ChatHub from './components/ChatHub';
 import { useMobileApp } from './hooks/useMobileApp';
 
 function MobileAppHandler() {
@@ -82,6 +83,7 @@ export default function App() {
             <Route path="teachers" element={<TeachersList />} />
             <Route path="teachers/:id" element={<TeacherProfile />} />
             <Route path="attendance" element={<AttendanceReport />} />
+            <Route path="chat" element={<ChatHub title="School Communication Hub" />} />
           </Route>
 
           {/* Teacher routes */}
@@ -98,6 +100,7 @@ export default function App() {
             <Route path="grades" element={<EnterGrades />} />
             <Route path="resources" element={<UploadResources />} />
             <Route path="announcements" element={<ClassAnnouncements />} />
+            <Route path="chat" element={<ChatHub title="Teacher-Parent Communication Hub" />} />
           </Route>
 
           {/* Student routes */}
@@ -146,6 +149,7 @@ export default function App() {
             <Route path="attendance" element={<ChildAttendance />} />
             <Route path="payments" element={<MakePayment />} />
             <Route path="history" element={<PaymentHistory />} />
+            <Route path="chat" element={<ChatHub title="Parent-Teacher Communication Hub" />} />
           </Route>
           
           {/* Payment Callback Route */}
