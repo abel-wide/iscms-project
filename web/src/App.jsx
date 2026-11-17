@@ -44,6 +44,10 @@ import MakePayment from './pages/parent/MakePayment';
 import PaymentHistory from './pages/parent/PaymentHistory';
 import PaymentCallback from './pages/parent/PaymentCallback';
 import ChatHub from './components/ChatHub';
+import TimetableManagement from './pages/admin/TimetableManagement';
+import MyTimetable from './pages/student/MyTimetable';
+import MyTeachingSchedule from './pages/teacher/MyTeachingSchedule';
+import ChildTimetable from './pages/parent/ChildTimetable';
 import { useMobileApp } from './hooks/useMobileApp';
 
 function MobileAppHandler() {
@@ -83,6 +87,7 @@ export default function App() {
             <Route path="teachers" element={<TeachersList />} />
             <Route path="teachers/:id" element={<TeacherProfile />} />
             <Route path="attendance" element={<AttendanceReport />} />
+            <Route path="timetable" element={<TimetableManagement />} />
             <Route path="chat" element={<ChatHub title="School Communication Hub" />} />
           </Route>
 
@@ -100,6 +105,7 @@ export default function App() {
             <Route path="grades" element={<EnterGrades />} />
             <Route path="resources" element={<UploadResources />} />
             <Route path="announcements" element={<ClassAnnouncements />} />
+            <Route path="timetable" element={<MyTeachingSchedule />} />
             <Route path="chat" element={<ChatHub title="Teacher-Parent Communication Hub" />} />
           </Route>
 
@@ -116,6 +122,7 @@ export default function App() {
             <Route path="grades" element={<MyGrades />} />
             <Route path="attendance" element={<MyAttendance />} />
             <Route path="resources" element={<LearningHub />} />
+            <Route path="timetable" element={<MyTimetable />} />
             <Route path="notifications" element={<MyNotifications />} />
           </Route>
 
@@ -132,6 +139,7 @@ export default function App() {
             <Route path="approvals" element={<StudentApprovals />} />
             <Route path="rules" element={<AcademicRules />} />
             <Route path="reports" element={<RegistrarReports />} />
+            <Route path="timetable" element={<TimetableManagement />} />
             <Route path="users" element={<StudentApprovals />} />
           </Route>
 
@@ -149,6 +157,7 @@ export default function App() {
             <Route path="attendance" element={<ChildAttendance />} />
             <Route path="payments" element={<MakePayment />} />
             <Route path="history" element={<PaymentHistory />} />
+            <Route path="timetable" element={<ChildTimetable />} />
             <Route path="chat" element={<ChatHub title="Parent-Teacher Communication Hub" />} />
           </Route>
           

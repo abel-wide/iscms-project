@@ -55,6 +55,9 @@ export default function RegistrarDashboard() {
           <SidebarLink to="/registrar/rules" icon="📜" active={location.pathname === '/registrar/rules'} onClick={() => setIsMobileMenuOpen(false)}>
             {t('academicRules') || 'Academic Rules'}
           </SidebarLink>
+          <SidebarLink to="/registrar/timetable" icon="🗓️" active={location.pathname === '/registrar/timetable'} onClick={() => setIsMobileMenuOpen(false)}>
+            {t('timetable') || 'Timetable'}
+          </SidebarLink>
           <SidebarLink to="/registrar/reports" icon="📈" active={location.pathname === '/registrar/reports'} onClick={() => setIsMobileMenuOpen(false)}>
             {t('reports')}
           </SidebarLink>
