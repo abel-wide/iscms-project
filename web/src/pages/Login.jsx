@@ -29,6 +29,7 @@ export default function Login() {
       else if (role === 'registrar') navigate('/registrar');
       else if (role === 'parent') navigate('/parent');
       else if (role === 'student') navigate('/student');
+      else if (role === 'head') navigate('/head');
       else navigate('/');
       
     } catch (err) {

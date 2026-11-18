@@ -53,6 +53,12 @@ import CreateExam from './pages/teacher/CreateExam';
 import ExamResults from './pages/teacher/ExamResults';
 import StudentExamList from './pages/student/StudentExamList';
 import OnlineExam from './pages/student/OnlineExam';
+import HeadDashboard from './pages/HeadDashboard';
+import HeadOverview from './pages/head/HeadOverview';
+import HeadReports from './pages/head/HeadReports';
+import HeadTimetable from './pages/head/HeadTimetable';
+import HeadTeacherPerformance from './pages/head/HeadTeacherPerformance';
+import HeadAnnouncements from './pages/head/HeadAnnouncements';
 import { useMobileApp } from './hooks/useMobileApp';
 
 function MobileAppHandler() {
@@ -174,6 +180,22 @@ export default function App() {
           {/* Payment Callback Route */}
           <Route path="/payment/callback" element={<PaymentCallback />} />
           <Route path="/payment/success" element={<PaymentCallback />} />
+
+          {/* Head routes */}
+          <Route
+            path="/head"
+            element={
+              <ProtectedRoute allowedRoles={['head']}>
+                <HeadDashboard />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<HeadOverview />} />
+            <Route path="reports" element={<HeadReports />} />
+            <Route path="timetable" element={<HeadTimetable />} />
+            <Route path="teachers" element={<HeadTeacherPerformance />} />
+            <Route path="announcements" element={<HeadAnnouncements />} />
+          </Route>
 
           <Route path="/" element={<LandingPage />} />
         </Routes>
