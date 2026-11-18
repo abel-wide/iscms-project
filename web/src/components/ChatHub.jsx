@@ -26,7 +26,7 @@ export default function ChatHub({ title = 'Communication Hub' }) {
     try {
       const res = await API.get('/messages/conversations');
       if (res.data?.success) {
-        setConversations(res.data.data);
+        setConversations(Array.isArray(res.data.data) ? res.data.data : []);
       }
     } catch (err) {
       console.error('Error fetching conversations:', err);
@@ -40,7 +40,7 @@ export default function ChatHub({ title = 'Communication Hub' }) {
     try {
       const res = await API.get('/messages/contacts');
       if (res.data?.success) {
-        setContacts(res.data.data);
+        setContacts(Array.isArray(res.data.data) ? res.data.data : []);
       }
     } catch (err) {
       console.error('Error fetching contacts:', err);
@@ -52,7 +52,7 @@ export default function ChatHub({ title = 'Communication Hub' }) {
     try {
       const res = await API.get(`/messages/history/${otherUserId}`);
       if (res.data?.success) {
-        setMessages(res.data.data);
+        setMessages(Array.isArray(res.data.data) ? res.data.data : []);
       }
     } catch (err) {
       console.error('Error fetching messages:', err);
@@ -75,7 +75,7 @@ export default function ChatHub({ title = 'Communication Hub' }) {
     const interval = setInterval(() => {
       fetchMessages(selectedUser._id);
       fetchConversations();
-    }, 4000);
+    }, 3500);
 
     return () => clearInterval(interval);
   }, [selectedUser]);
@@ -95,7 +95,7 @@ export default function ChatHub({ title = 'Communication Hub' }) {
     try {
       const res = await API.post('/messages', {
         recipientId: selectedUser._id,
-        text: messageText
+        text: messageText,
       });
 
       if (res.data?.success) {
@@ -110,11 +110,11 @@ export default function ChatHub({ title = 'Communication Hub' }) {
     }
   };
 
-  const filteredConversations = conversations.filter((c) =>
+  const filteredConversations = (conversations || []).filter((c) =>
     c.user?.fullName?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredContacts = contacts.filter((c) =>
+  const filteredContacts = (contacts || []).filter((c) =>
     c.fullName?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -128,7 +128,7 @@ export default function ChatHub({ title = 'Communication Hub' }) {
           </h2>
           <p className="text-xs text-slate-500">
             {user?.role === 'parent'
-              ? 'Direct, secure communication with your child’s teachers'
+              ? "Direct, secure communication with your child's teachers"
               : 'Direct communication with enrolled student parents'}
           </p>
         </div>
@@ -148,44 +148,40 @@ export default function ChatHub({ title = 'Communication Hub' }) {
             selectedUser ? 'hidden md:flex' : 'flex'
           }`}
         >
-          {/* Search bar */}
           <div className="p-3 border-b border-slate-200 bg-white">
             <input
               type="text"
               placeholder="Search conversations..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-3 py-2 text-sm bg-slate-100 rounded-lg border-none focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3 py-2 text-xs bg-slate-100 rounded-lg border-none focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
 
-          {/* Conversation list */}
           <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
             {loadingConv ? (
-              <div className="p-6 text-center text-xs text-slate-400">Loading conversations...</div>
+              <div className="p-8 text-center text-xs text-slate-400">Loading conversations...</div>
             ) : filteredConversations.length === 0 ? (
-              <div className="p-6 text-center">
-                <p className="text-sm font-medium text-slate-600 mb-1">No conversations yet</p>
-                <p className="text-xs text-slate-400 mb-4">Start a conversation with a teacher or parent</p>
-                <button
-                  onClick={() => setShowNewChatModal(true)}
-                  className="text-xs bg-indigo-50 text-indigo-600 font-semibold px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition"
-                >
-                  Start New Chat
-                </button>
+              <div className="p-8 text-center text-xs text-slate-400">
+                <p>No active conversations yet.</p>
+                <p className="mt-1">Click "+ New Chat" to start messaging.</p>
               </div>
             ) : (
               filteredConversations.map((conv) => {
                 const isSelected = selectedUser?._id === conv.user?._id;
+                const isLastMsgMine =
+                  conv.lastMessage?.sender === user?._id ||
+                  conv.lastMessage?.sender?._id === user?._id;
+
                 return (
                   <button
                     key={conv.user?._id}
                     onClick={() => setSelectedUser(conv.user)}
-                    className={`w-full text-left p-3.5 flex items-start gap-3 transition ${
-                      isSelected ? 'bg-indigo-50/80 border-r-4 border-indigo-600' : 'hover:bg-slate-100/70'
+                    className={`w-full text-left p-3.5 transition flex items-start gap-3 ${
+                      isSelected ? 'bg-indigo-50/90 border-l-4 border-indigo-600' : 'hover:bg-slate-100/70'
                     }`}
                   >
-                    <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold flex items-center justify-center text-sm shadow-sm flex-shrink-0">
                       {conv.user?.fullName?.charAt(0) || 'U'}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -197,20 +193,31 @@ export default function ChatHub({ title = 'Communication Hub' }) {
                           {conv.lastMessage?.createdAt
                             ? new Date(conv.lastMessage.createdAt).toLocaleTimeString([], {
                                 hour: '2-digit',
-                                minute: '2-digit'
+                                minute: '2-digit',
                               })
                             : ''}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-500 truncate">
-                        {conv.lastMessage?.text || 'No messages'}
-                      </p>
+
+                      <div className="flex items-center gap-1 text-xs text-slate-500 truncate">
+                        {isLastMsgMine && (
+                          <span
+                            className={conv.lastMessage?.read ? 'text-cyan-600 font-bold' : 'text-slate-400 font-bold'}
+                            title={conv.lastMessage?.read ? 'Read' : 'Delivered'}
+                          >
+                            {conv.lastMessage?.read ? '✓✓' : '✓'}
+                          </span>
+                        )}
+                        <span className="truncate">{conv.lastMessage?.text || 'No messages'}</span>
+                      </div>
+
                       <span className="inline-block mt-1 text-[10px] font-medium uppercase px-1.5 py-0.5 rounded bg-slate-200 text-slate-600">
                         {conv.user?.role}
                       </span>
                     </div>
+
                     {conv.unreadCount > 0 && (
-                      <span className="shrink-0 bg-indigo-600 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full">
+                      <span className="shrink-0 bg-emerald-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-full shadow-sm animate-pulse">
                         {conv.unreadCount}
                       </span>
                     )}
@@ -221,24 +228,20 @@ export default function ChatHub({ title = 'Communication Hub' }) {
           </div>
         </div>
 
-        {/* Right: Message Window (Full screen on mobile if user selected) */}
-        <div
-          className={`flex-1 flex flex-col bg-white ${
-            !selectedUser ? 'hidden md:flex items-center justify-center' : 'flex'
-          }`}
-        >
+        {/* Right: Message Window */}
+        <div className={`flex-1 flex flex-col bg-slate-50 ${!selectedUser ? 'hidden md:flex' : 'flex'}`}>
           {selectedUser ? (
             <>
-              {/* Chat Header */}
-              <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
+              {/* Chat Active Header */}
+              <div className="px-5 py-3 border-b border-slate-200 bg-white flex items-center justify-between shadow-sm">
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setSelectedUser(null)}
-                    className="md:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-200 transition"
+                    className="md:hidden p-1.5 rounded-lg text-slate-600 hover:bg-slate-100"
                   >
                     ←
                   </button>
-                  <div className="w-9 h-9 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center text-sm">
+                  <div className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-sm">
                     {selectedUser.fullName?.charAt(0) || 'U'}
                   </div>
                   <div>
@@ -248,24 +251,37 @@ export default function ChatHub({ title = 'Communication Hub' }) {
                     </p>
                   </div>
                 </div>
+
+                {/* Delivery / Read Status Legend */}
+                <div className="hidden sm:flex items-center gap-3 text-[11px] bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+                  <span className="flex items-center gap-1 text-slate-500">
+                    <span className="font-bold text-slate-600">✓</span> ደርሷል (Delivered)
+                  </span>
+                  <span className="text-slate-300">•</span>
+                  <span className="flex items-center gap-1 text-cyan-600 font-semibold">
+                    <span className="font-bold">✓✓</span> ተነቧል (Read)
+                  </span>
+                </div>
               </div>
 
-              {/* Message List */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/30">
+              {/* Messages Scroll Area */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {loadingMessages ? (
-                  <div className="text-center py-10 text-xs text-slate-400">Loading conversation...</div>
+                  <div className="text-center py-8 text-xs text-slate-400">Loading chat history...</div>
                 ) : messages.length === 0 ? (
-                  <div className="text-center py-12">
-                    <p className="text-sm text-slate-500 font-medium">No messages yet</p>
-                    <p className="text-xs text-slate-400 mt-1">Send a greeting to start chatting!</p>
+                  <div className="text-center py-12 text-slate-400">
+                    <p className="text-xs">No messages yet with {selectedUser.fullName}.</p>
+                    <p className="text-[11px] mt-1 text-indigo-600">Send a greeting to start chatting!</p>
                   </div>
                 ) : (
                   messages.map((msg) => {
-                    const isMe = msg.sender?._id === user?._id || msg.sender === user?._id;
+                    const senderId = msg.sender?._id || msg.sender;
+                    const isMe = senderId === user?._id;
+
                     return (
                       <div key={msg._id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                         <div
-                          className={`max-w-[80%] md:max-w-[70%] rounded-2xl px-4 py-2.5 text-sm shadow-sm ${
+                          className={`max-w-[85%] md:max-w-[70%] rounded-2xl px-4 py-2.5 text-sm shadow-sm ${
                             isMe
                               ? 'bg-indigo-600 text-white rounded-br-none'
                               : 'bg-white text-slate-800 border border-slate-200 rounded-bl-none'
@@ -273,17 +289,44 @@ export default function ChatHub({ title = 'Communication Hub' }) {
                         >
                           <p className="break-words leading-relaxed whitespace-pre-wrap">{msg.text}</p>
                           <div
-                            className={`text-[10px] mt-1 text-right flex items-center justify-end gap-1 ${
-                              isMe ? 'text-indigo-200' : 'text-slate-400'
+                            className={`text-[10px] mt-1.5 text-right flex items-center justify-end gap-1.5 ${
+                              isMe ? 'text-indigo-100' : 'text-slate-400'
                             }`}
                           >
                             <span>
                               {new Date(msg.createdAt).toLocaleTimeString([], {
                                 hour: '2-digit',
-                                minute: '2-digit'
+                                minute: '2-digit',
                               })}
                             </span>
-                            {isMe && <span>{msg.read ? '✓✓' : '✓'}</span>}
+
+                            {/* Delivery & Read Receipts for Sender */}
+                            {isMe && (
+                              msg.read ? (
+                                <span
+                                  className="inline-flex items-center gap-1 text-cyan-300 font-bold ml-1 bg-indigo-700/60 px-1.5 py-0.5 rounded shadow-sm text-[10px]"
+                                  title={
+                                    msg.readAt
+                                      ? `Read at ${new Date(msg.readAt).toLocaleTimeString([], {
+                                          hour: '2-digit',
+                                          minute: '2-digit',
+                                        })}`
+                                      : 'Read by recipient'
+                                  }
+                                >
+                                  <span>✓✓</span>
+                                  <span>ተነቧል</span>
+                                </span>
+                              ) : (
+                                <span
+                                  className="inline-flex items-center gap-1 text-indigo-200 ml-1 bg-indigo-700/30 px-1.5 py-0.5 rounded text-[10px]"
+                                  title="Delivered to recipient"
+                                >
+                                  <span>✓</span>
+                                  <span>ደርሷል</span>
+                                </span>
+                              )
+                            )}
                           </div>
                         </div>
                       </div>
@@ -312,7 +355,7 @@ export default function ChatHub({ title = 'Communication Hub' }) {
               </form>
             </>
           ) : (
-            <div className="text-center p-8 text-slate-400">
+            <div className="text-center p-8 text-slate-400 my-auto">
               <span className="text-4xl block mb-2">💬</span>
               <p className="text-sm font-semibold text-slate-600">Select a conversation or start a new chat</p>
               <p className="text-xs mt-1">Communicate securely regarding student progress, assignments & updates.</p>
@@ -365,7 +408,9 @@ export default function ChatHub({ title = 'Communication Hub' }) {
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-slate-800">{contact.fullName}</p>
-                      <p className="text-xs text-slate-500 capitalize">{contact.role} • {contact.email}</p>
+                      <p className="text-xs text-slate-500 capitalize">
+                        {contact.role} • {contact.email}
+                      </p>
                     </div>
                   </button>
                 ))

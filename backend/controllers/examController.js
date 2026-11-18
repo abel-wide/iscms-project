@@ -14,6 +14,7 @@ exports.createExam = async (req, res) => {
       title,
       subject,
       classroomId,
+      classId,
       durationMinutes,
       passingMarks,
       term,
@@ -21,41 +22,52 @@ exports.createExam = async (req, res) => {
       questions
     } = req.body;
 
-    if (!title || !subject || !classroomId || !questions || !questions.length) {
+    const targetClassroomId = classroomId || classId;
+
+    if (!title || !subject || !targetClassroomId || !questions || !questions.length) {
       return res.status(400).json({
         success: false,
         message: 'Title, subject, classroom, and at least one question are required'
       });
     }
 
-    const classroom = await Class.findById(classroomId);
+    const classroom = await Class.findById(targetClassroomId);
     if (!classroom) {
       return res.status(404).json({ success: false, message: 'Classroom not found' });
     }
 
-    // Validate questions structure
+    // Validate and format questions structure
     let totalMarks = 0;
+    const formattedQuestions = [];
     for (const q of questions) {
-      if (!q.questionText || !q.options || q.options.length < 2 || q.correctAnswerIndex === undefined) {
+      const qText = q.questionText || q.text;
+      if (!qText || !q.options || q.options.length < 2 || q.correctAnswerIndex === undefined) {
         return res.status(400).json({
           success: false,
           message: 'Each question must have text, at least 2 options, and a valid correct answer'
         });
       }
-      totalMarks += Number(q.marks || 1);
+      const markValue = Number(q.marks || 1);
+      totalMarks += markValue;
+      formattedQuestions.push({
+        questionText: qText,
+        options: q.options,
+        correctAnswerIndex: Number(q.correctAnswerIndex),
+        marks: markValue
+      });
     }
 
     const exam = await Exam.create({
       title,
       subject,
-      classroom: classroomId,
+      classroom: targetClassroomId,
       createdBy: req.user._id,
       durationMinutes: durationMinutes || 20,
       totalMarks,
       passingMarks: passingMarks || Math.ceil(totalMarks / 2),
       term: term || 'Term 1',
       deadline: deadline || null,
-      questions
+      questions: formattedQuestions
     });
 
     // Notify students in the classroom

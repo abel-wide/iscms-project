@@ -11,7 +11,8 @@ const {
 
 router.use(protect);
 
-// Get my exams (Teacher / Student / Admin)
+// Get my exams (Teacher / Student / Admin) - support both / and /my-exams
+router.get('/', getMyExams);
 router.get('/my-exams', getMyExams);
 
 // Single exam details

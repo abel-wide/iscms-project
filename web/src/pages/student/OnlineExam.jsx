@@ -16,24 +16,32 @@ export default function OnlineExam() {
 
   useEffect(() => {
     API.get(`/exams/${id}`)
-      .then(r => {
-        setExam(r.data);
-        // If already submitted, show result
-        if (r.data.submission) {
-          setResult(r.data.submission);
+      .then((r) => {
+        const examObj = r.data?.data || r.data;
+        setExam(examObj);
+
+        // If already submitted, display submission results directly
+        const sub = r.data?.submission || examObj?.submission;
+        if (sub || r.data?.isSubmitted) {
+          setResult(sub);
         } else {
-          setTimeLeft(r.data.durationMinutes * 60);
+          const duration = Number(examObj?.durationMinutes) || 20;
+          setTimeLeft(duration * 60);
         }
       })
-      .catch(err => setError(err.response?.data?.message || 'Failed to load exam.'))
+      .catch((err) => {
+        console.error('Error loading exam:', err);
+        setError(err.response?.data?.message || 'Failed to load exam details.');
+      })
       .finally(() => setLoading(false));
   }, [id]);
 
   // Countdown timer
   useEffect(() => {
     if (timeLeft === null || timeLeft <= 0 || result) return;
+
     timerRef.current = setInterval(() => {
-      setTimeLeft(prev => {
+      setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timerRef.current);
           handleSubmit();
@@ -42,18 +50,20 @@ export default function OnlineExam() {
         return prev - 1;
       });
     }, 1000);
+
     return () => clearInterval(timerRef.current);
   }, [timeLeft, result]);
 
   const handleSelect = (questionId, optionIndex) => {
-    if (result) return;
-    setAnswers({ ...answers, [questionId]: optionIndex });
+    if (result || submitting) return;
+    setAnswers((prev) => ({ ...prev, [questionId]: optionIndex }));
   };
 
   const handleSubmit = useCallback(async () => {
     if (submitting || result) return;
     setSubmitting(true);
     clearInterval(timerRef.current);
+
     try {
       const payload = {
         answers: Object.entries(answers).map(([questionId, selectedOption]) => ({
@@ -61,86 +71,147 @@ export default function OnlineExam() {
           selectedOption: Number(selectedOption),
         })),
       };
+
       const res = await API.post(`/exams/${id}/submit`, payload);
-      setResult(res.data);
+      const resData = res.data?.data || res.data;
+      setResult(resData);
     } catch (err) {
+      console.error('Submission error:', err);
       setError(err.response?.data?.message || 'Failed to submit exam.');
       setSubmitting(false);
     }
   }, [answers, id, submitting, result]);
 
   const formatTime = (seconds) => {
+    if (seconds === null || seconds === undefined) return '00:00';
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  if (loading) return (
-    <div className="flex items-center justify-center min-h-64">
-      <div className="animate-spin w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full"></div>
-    </div>
-  );
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-64 py-16">
+        <div className="animate-spin w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full mb-3" />
+        <p className="text-sm text-slate-400">Loading your exam...</p>
+      </div>
+    );
+  }
 
-  if (error) return (
-    <div className="max-w-2xl mx-auto p-4">
-      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm mb-4">{error}</div>
-      <button onClick={() => navigate('/student/exams')} className="text-indigo-600 text-sm hover:underline">← Back to Exams</button>
-    </div>
-  );
+  if (error && !result) {
+    return (
+      <div className="max-w-2xl mx-auto p-4">
+        <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-sm mb-4">
+          {error}
+        </div>
+        <button
+          onClick={() => navigate('/student/exams')}
+          className="text-amber-600 font-semibold text-sm hover:underline"
+        >
+          ← Back to Exams
+        </button>
+      </div>
+    );
+  }
 
-  const totalMarks = exam?.questions?.reduce((s, q) => s + q.marks, 0) || 0;
+  const questions = exam?.questions || [];
+  const totalQuestions = questions.length;
+  const totalMarks = exam?.totalMarks || questions.reduce((s, q) => s + (q.marks || 1), 0);
   const answeredCount = Object.keys(answers).length;
-  const totalQuestions = exam?.questions?.length || 0;
 
-  // === RESULT VIEW ===
+  // ==========================================
+  // RESULT VIEW
+  // ==========================================
   if (result) {
+    const scoreVal = result.score ?? 0;
+    const totalVal = result.totalPossible || totalMarks;
+    const percentVal = result.percentage ?? Math.round((scoreVal / (totalVal || 1)) * 100);
+    const isPassed = result.passed ?? (scoreVal >= (exam?.passingMarks || totalVal / 2));
+    const gradedAnswers = result.gradedAnswers || result.answers || [];
+
     return (
       <div className="max-w-2xl mx-auto p-4 pb-20">
-        <div className="text-center mb-8">
-          <div className="text-6xl mb-4">{result.passed ? '🎉' : '😞'}</div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">
-            {result.passed ? 'Congratulations! You Passed!' : 'Better Luck Next Time'}
+        <div className="text-center mb-8 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <div className="text-6xl mb-3">{isPassed ? '🎉' : '📝'}</div>
+          <h1 className="text-2xl font-bold text-slate-800 mb-1">
+            {isPassed ? 'Congratulations! You Passed!' : 'Exam Completed'}
           </h1>
-          <p className="text-gray-500">{exam?.title}</p>
+          <p className="text-sm text-slate-500">
+            {exam?.title} — {exam?.subject}
+          </p>
         </div>
 
         <div className="grid grid-cols-3 gap-4 mb-8">
-          <div className="bg-indigo-50 rounded-2xl p-4 text-center">
-            <p className="text-2xl font-bold text-indigo-700">{result.score}/{totalMarks}</p>
-            <p className="text-xs text-gray-500 mt-1">Score</p>
-          </div>
-          <div className="bg-blue-50 rounded-2xl p-4 text-center">
-            <p className="text-2xl font-bold text-blue-700">{result.percentage}%</p>
-            <p className="text-xs text-gray-500 mt-1">Percentage</p>
-          </div>
-          <div className={`${result.passed ? 'bg-green-50' : 'bg-red-50'} rounded-2xl p-4 text-center`}>
-            <p className={`text-2xl font-bold ${result.passed ? 'text-green-700' : 'text-red-600'}`}>
-              {result.passed ? '✓ Pass' : '✗ Fail'}
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 text-center shadow-sm">
+            <p className="text-2xl font-bold text-indigo-700">
+              {scoreVal} / {totalVal}
             </p>
-            <p className="text-xs text-gray-500 mt-1">Status</p>
+            <p className="text-xs text-slate-500 mt-1">Final Score</p>
+          </div>
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 text-center shadow-sm">
+            <p className="text-2xl font-bold text-blue-700">{percentVal}%</p>
+            <p className="text-xs text-slate-500 mt-1">Percentage</p>
+          </div>
+          <div
+            className={`border rounded-2xl p-4 text-center shadow-sm ${
+              isPassed ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'
+            }`}
+          >
+            <p className={`text-2xl font-bold ${isPassed ? 'text-emerald-700' : 'text-rose-600'}`}>
+              {isPassed ? '✓ Passed' : '✗ Failed'}
+            </p>
+            <p className="text-xs text-slate-500 mt-1">Result Status</p>
           </div>
         </div>
 
-        {/* Per-question breakdown */}
-        {result.answers && (
+        {/* Question Breakdown */}
+        {gradedAnswers.length > 0 && (
           <div className="space-y-3 mb-8">
-            <h2 className="font-semibold text-gray-700">Question Breakdown</h2>
-            {exam.questions.map((q, idx) => {
-              const ans = result.answers.find(a => a.questionId === q._id);
+            <h3 className="font-bold text-slate-800 text-sm">Question Breakdown</h3>
+            {questions.map((q, idx) => {
+              const ans = gradedAnswers.find((a) => (a.questionId?._id || a.questionId) === q._id);
+              const isCorrect = ans?.isCorrect;
+              const selectedOpt = ans?.selectedOption;
+              const qText = q.questionText || q.text;
+
               return (
-                <div key={q._id} className={`p-4 rounded-xl border ${ans?.isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
+                <div
+                  key={q._id || idx}
+                  className={`p-4 rounded-xl border ${
+                    isCorrect
+                      ? 'border-emerald-200 bg-emerald-50/50'
+                      : 'border-rose-200 bg-rose-50/50'
+                  }`}
+                >
                   <div className="flex items-start gap-2">
-                    <span className={`text-sm font-bold ${ans?.isCorrect ? 'text-green-600' : 'text-red-600'}`}>
-                      {ans?.isCorrect ? '✓' : '✗'}
+                    <span
+                      className={`text-sm font-bold mt-0.5 ${
+                        isCorrect ? 'text-emerald-600' : 'text-rose-600'
+                      }`}
+                    >
+                      {isCorrect ? '✓' : '✗'}
                     </span>
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-800">Q{idx + 1}: {q.text}</p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Your answer: {q.options[ans?.selectedOption] || 'Not answered'} 
-                        {!ans?.isCorrect && ` → Correct: ${q.options[q.correctAnswerIndex]}`}
+                      <p className="text-sm font-medium text-slate-800">
+                        Q{idx + 1}: {qText}
+                      </p>
+                      <p className="text-xs text-slate-600 mt-1">
+                        Your Choice:{' '}
+                        <span className="font-semibold">
+                          {selectedOpt !== undefined && selectedOpt >= 0 && q.options[selectedOpt]
+                            ? q.options[selectedOpt]
+                            : 'No Answer Selected'}
+                        </span>
+                        {!isCorrect && q.correctAnswerIndex !== undefined && (
+                          <span className="text-emerald-700 font-semibold ml-2">
+                            → Correct: {q.options[q.correctAnswerIndex]}
+                          </span>
+                        )}
                       </p>
                     </div>
-                    <span className="text-xs text-gray-400">{ans?.marksAwarded}/{q.marks}</span>
+                    <span className="text-xs font-semibold text-slate-400">
+                      {ans?.marksAwarded ?? (isCorrect ? q.marks || 1 : 0)} / {q.marks || 1} pts
+                    </span>
                   </div>
                 </div>
               );
@@ -148,79 +219,130 @@ export default function OnlineExam() {
           </div>
         )}
 
-        <button onClick={() => navigate('/student/exams')}
-          className="w-full bg-amber-500 text-white py-3 rounded-2xl font-medium hover:bg-amber-600 transition">
+        <button
+          onClick={() => navigate('/student/exams')}
+          className="w-full bg-slate-800 text-white py-3.5 rounded-2xl font-semibold hover:bg-slate-900 transition"
+        >
           ← Back to Exams
         </button>
       </div>
     );
   }
 
-  // === EXAM VIEW ===
+  // ==========================================
+  // EXAM TAKING VIEW
+  // ==========================================
   return (
-    <div className="max-w-2xl mx-auto p-4 pb-20">
-      {/* Timer Header */}
-      <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border border-gray-100 rounded-2xl p-4 mb-6 shadow-sm">
+    <div className="max-w-2xl mx-auto p-4 pb-24">
+      {/* Timer & Progress Header */}
+      <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border border-slate-200 rounded-2xl p-4 mb-6 shadow-md">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="font-bold text-gray-800 text-lg">{exam?.title}</h1>
-            <p className="text-xs text-gray-500">{exam?.subject} • {totalQuestions} questions</p>
+            <h1 className="font-bold text-slate-800 text-base">{exam?.title}</h1>
+            <p className="text-xs text-slate-500">
+              {exam?.subject} • {totalQuestions} Questions
+            </p>
           </div>
-          <div className={`text-center px-4 py-2 rounded-xl ${timeLeft < 60 ? 'bg-red-100 text-red-700 animate-pulse' : timeLeft < 300 ? 'bg-yellow-100 text-yellow-700' : 'bg-indigo-100 text-indigo-700'}`}>
-            <p className="text-2xl font-mono font-bold">{formatTime(timeLeft)}</p>
-            <p className="text-xs">Time Left</p>
+          <div
+            className={`text-center px-4 py-1.5 rounded-xl border ${
+              timeLeft !== null && timeLeft < 60
+                ? 'bg-rose-100 border-rose-300 text-rose-700 animate-pulse'
+                : timeLeft !== null && timeLeft < 300
+                ? 'bg-amber-100 border-amber-300 text-amber-800'
+                : 'bg-indigo-50 border-indigo-200 text-indigo-700'
+            }`}
+          >
+            <p className="text-xl font-mono font-bold">{formatTime(timeLeft)}</p>
+            <p className="text-[10px] uppercase font-bold tracking-wider">Time Left</p>
           </div>
         </div>
+
         <div className="mt-3 flex items-center gap-2">
-          <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-            <div className="h-full bg-amber-500 transition-all rounded-full" style={{ width: `${(answeredCount / totalQuestions) * 100}%` }} />
+          <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-amber-500 transition-all rounded-full"
+              style={{
+                width: `${totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0}%`,
+              }}
+            />
           </div>
-          <span className="text-xs text-gray-500 whitespace-nowrap">{answeredCount}/{totalQuestions}</span>
+          <span className="text-xs font-semibold text-slate-500 whitespace-nowrap">
+            {answeredCount} / {totalQuestions} Answered
+          </span>
         </div>
       </div>
 
       {/* Questions */}
       <div className="space-y-5 mb-8">
-        {exam.questions.map((q, idx) => (
-          <div key={q._id} className={`bg-white rounded-2xl shadow-sm border p-5 transition ${answers[q._id] !== undefined ? 'border-amber-200' : 'border-gray-100'}`}>
-            <div className="flex justify-between items-start mb-3">
-              <p className="font-medium text-gray-800">
-                <span className="text-amber-600 font-bold mr-1">Q{idx + 1}.</span> {q.text}
-              </p>
-              <span className="text-xs text-gray-400 ml-2 whitespace-nowrap">{q.marks} mk{q.marks > 1 ? 's' : ''}</span>
+        {questions.map((q, idx) => {
+          const qText = q.questionText || q.text;
+          const isAnswered = answers[q._id] !== undefined;
+
+          return (
+            <div
+              key={q._id || idx}
+              className={`bg-white rounded-2xl shadow-sm border p-5 transition ${
+                isAnswered ? 'border-amber-300' : 'border-slate-200'
+              }`}
+            >
+              <div className="flex justify-between items-start mb-3">
+                <p className="font-semibold text-slate-800 text-sm leading-relaxed">
+                  <span className="text-amber-600 font-bold mr-1.5">Q{idx + 1}.</span> {qText}
+                </p>
+                <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md font-medium ml-2 whitespace-nowrap">
+                  {q.marks || 1} pt{(q.marks || 1) > 1 ? 's' : ''}
+                </span>
+              </div>
+
+              <div className="space-y-2 mt-3">
+                {(q.options || []).map((opt, oIdx) => {
+                  const isSelected = answers[q._id] === oIdx;
+                  return (
+                    <button
+                      key={oIdx}
+                      type="button"
+                      onClick={() => handleSelect(q._id, oIdx)}
+                      className={`w-full text-left px-4 py-3 rounded-xl text-sm transition border flex items-center gap-3 ${
+                        isSelected
+                          ? 'bg-amber-50 border-amber-400 text-amber-900 font-semibold shadow-sm'
+                          : 'bg-slate-50/80 border-slate-200 text-slate-700 hover:bg-slate-100'
+                      }`}
+                    >
+                      <span
+                        className={`w-6 h-6 rounded-full border flex items-center justify-center text-xs font-bold transition flex-shrink-0 ${
+                          isSelected
+                            ? 'border-amber-600 bg-amber-600 text-white'
+                            : 'border-slate-300 bg-white text-slate-500'
+                        }`}
+                      >
+                        {String.fromCharCode(65 + oIdx)}
+                      </span>
+                      <span className="flex-1">{opt}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-            <div className="space-y-2">
-              {q.options.map((opt, oIdx) => (
-                <button
-                  key={oIdx}
-                  type="button"
-                  onClick={() => handleSelect(q._id, oIdx)}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-sm transition border ${
-                    answers[q._id] === oIdx
-                      ? 'bg-amber-50 border-amber-300 text-amber-800 font-medium'
-                      : 'bg-gray-50 border-gray-100 text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  <span className="inline-block w-5 h-5 mr-2 rounded-full border-2 text-center text-xs leading-5 align-middle
-                    ${answers[q._id] === oIdx ? 'border-amber-500 bg-amber-500 text-white' : 'border-gray-300'}"
-                  >
-                    {String.fromCharCode(65 + oIdx)}
-                  </span>
-                  {opt}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {/* Submit */}
+      {/* Submit Button */}
       <button
         onClick={handleSubmit}
         disabled={submitting || answeredCount === 0}
-        className="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-3.5 rounded-2xl transition shadow-md disabled:opacity-50"
+        className="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-slate-300 text-white font-bold py-4 rounded-2xl transition shadow-md disabled:cursor-not-allowed text-base flex items-center justify-center gap-2"
       >
-        {submitting ? 'Submitting...' : `📤 Submit Exam (${answeredCount}/${totalQuestions} answered)`}
+        {submitting ? (
+          <>
+            <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full" />
+            <span>Grading your exam instantly...</span>
+          </>
+        ) : (
+          <span>
+            📤 Submit Exam ({answeredCount} of {totalQuestions} answered)
+          </span>
+        )}
       </button>
     </div>
   );

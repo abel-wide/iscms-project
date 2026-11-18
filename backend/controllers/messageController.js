@@ -74,7 +74,7 @@ exports.getMessages = async (req, res) => {
     // Mark unread messages sent by otherUser as read
     await Message.updateMany(
       { sender: otherUserId, recipient: req.user._id, read: false },
-      { $set: { read: true } }
+      { $set: { read: true, readAt: new Date() } }
     );
 
     res.json({

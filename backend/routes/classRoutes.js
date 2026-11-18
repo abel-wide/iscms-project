@@ -32,6 +32,14 @@ router.get(
   getMyClasses
 );
 
+// Alias for convenience
+router.get(
+  '/my-classes',
+  protect,
+  allow('teacher'),
+  getMyClasses
+);
+
 // Get single class
 router.get(
   '/:id',
