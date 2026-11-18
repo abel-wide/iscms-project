@@ -88,6 +88,74 @@ exports.getMessages = async (req, res) => {
   }
 };
 
+// Helper to enrich user with child & homeroom teacher details
+async function enrichUserWithChildDetails(targetUser, viewerUser) {
+  const targetObj = targetUser?.toObject ? targetUser.toObject() : { ...targetUser };
+
+  // If target is a PARENT: find their enrolled children and classes
+  if (targetObj.role === 'parent') {
+    const children = await User.find({ parent: targetObj._id, role: 'student' })
+      .select('fullName gradeLevel')
+      .lean();
+
+    const childDetails = await Promise.all(
+      children.map(async (child) => {
+        const cls = await Class.findOne({ students: child._id })
+          .select('className gradeLevel section homeroomTeacher')
+          .lean();
+        const isMyHomeroom =
+          viewerUser?.role === 'teacher' &&
+          cls?.homeroomTeacher &&
+          cls.homeroomTeacher.toString() === viewerUser._id.toString();
+
+        return {
+          studentId: child._id,
+          studentName: child.fullName,
+          gradeLevel: child.gradeLevel || cls?.gradeLevel || '',
+          className: cls?.className || 'Unassigned',
+          section: cls?.section || '',
+          isMyHomeroomStudent: Boolean(isMyHomeroom)
+        };
+      })
+    );
+
+    targetObj.children = childDetails;
+    targetObj.hasHomeroomChildWithMe = childDetails.some((c) => c.isMyHomeroomStudent);
+  }
+
+  // If target is a TEACHER and viewer is a PARENT: check if teacher is child's homeroom teacher
+  if (targetObj.role === 'teacher' && viewerUser?.role === 'parent') {
+    const myChildren = await User.find({ parent: viewerUser._id, role: 'student' })
+      .select('fullName')
+      .lean();
+    const childIds = myChildren.map((c) => c._id);
+
+    const homeroomClasses = await Class.find({
+      students: { $in: childIds },
+      homeroomTeacher: targetObj._id
+    })
+      .select('className gradeLevel section students')
+      .lean();
+
+    const homeroomFor = [];
+    for (const cls of homeroomClasses) {
+      for (const child of myChildren) {
+        if (cls.students && cls.students.some((sId) => sId.toString() === child._id.toString())) {
+          homeroomFor.push({
+            studentName: child.fullName,
+            className: cls.className
+          });
+        }
+      }
+    }
+
+    targetObj.isChildHomeroomTeacher = homeroomFor.length > 0;
+    targetObj.homeroomFor = homeroomFor;
+  }
+
+  return targetObj;
+}
+
 // @desc    Get recent conversation threads for the user
 // @route   GET /api/messages/conversations
 // @access  Private
@@ -129,9 +197,17 @@ exports.getConversations = async (req, res) => {
       }
     }
 
+    const conversationList = Array.from(conversationMap.values());
+    const enrichedConversations = await Promise.all(
+      conversationList.map(async (conv) => ({
+        ...conv,
+        user: await enrichUserWithChildDetails(conv.user, req.user)
+      }))
+    );
+
     res.json({
       success: true,
-      data: Array.from(conversationMap.values())
+      data: enrichedConversations
     });
   } catch (error) {
     console.error('Error fetching conversations:', error);
@@ -144,25 +220,40 @@ exports.getConversations = async (req, res) => {
 // @access  Private
 exports.getContacts = async (req, res) => {
   try {
-    const userRole = req.user.role;
-    let contacts = [];
+    const viewerUser = req.user;
+    let rawContacts = [];
 
-    if (userRole === 'parent') {
+    if (viewerUser.role === 'parent') {
       // Parents can chat with teachers
-      contacts = await User.find({ role: 'teacher', isActive: true })
+      rawContacts = await User.find({ role: 'teacher', isActive: true })
         .select('fullName email role')
         .sort({ fullName: 1 });
-    } else if (userRole === 'teacher') {
+    } else if (viewerUser.role === 'teacher') {
       // Teachers can chat with parents
-      contacts = await User.find({ role: 'parent', isActive: true })
+      rawContacts = await User.find({ role: 'parent', isActive: true })
         .select('fullName email role')
         .sort({ fullName: 1 });
     } else {
       // Admins/Registrars/Heads can chat with both teachers and parents
-      contacts = await User.find({ role: { $in: ['teacher', 'parent'] }, isActive: true })
+      rawContacts = await User.find({ role: { $in: ['teacher', 'parent'] }, isActive: true })
         .select('fullName email role')
         .sort({ fullName: 1 });
     }
+
+    const contacts = await Promise.all(
+      rawContacts.map((c) => enrichUserWithChildDetails(c, viewerUser))
+    );
+
+    // Sort: if parent, prioritize homeroom teacher! If teacher, prioritize homeroom parent!
+    contacts.sort((a, b) => {
+      if (viewerUser.role === 'parent') {
+        return (b.isChildHomeroomTeacher ? 1 : 0) - (a.isChildHomeroomTeacher ? 1 : 0);
+      }
+      if (viewerUser.role === 'teacher') {
+        return (b.hasHomeroomChildWithMe ? 1 : 0) - (a.hasHomeroomChildWithMe ? 1 : 0);
+      }
+      return 0;
+    });
 
     res.json({
       success: true,

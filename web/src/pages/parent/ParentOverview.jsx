@@ -111,6 +111,15 @@ export default function ParentOverview() {
         <div className="flex-1 text-center md:text-left">
           <h2 className="text-xl font-bold text-gray-800">{selectedChild?.fullName}</h2>
           <p className="text-sm text-gray-500">{selectedChild?.email}</p>
+          <div className="mt-2 flex flex-wrap gap-2 justify-center md:justify-start">
+            <button
+              onClick={() => navigate('/parent/chat')}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-xl transition shadow-xs"
+            >
+              <span>💬</span>
+              <span>ከመምህሩ ጋር ተወያይ (Chat)</span>
+            </button>
+          </div>
         </div>
 
         {children.length > 1 && (

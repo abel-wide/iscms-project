@@ -212,6 +212,20 @@ export default function ChatHub({ title = 'Communication Hub' }) {
                         </span>
                       </div>
 
+                      {/* Student info for teachers, homeroom teacher badge for parents */}
+                      {conv.user?.role === 'parent' && conv.user?.children?.length > 0 && (
+                        <p className="text-[11px] font-semibold text-emerald-700 truncate">
+                          🎓 {conv.user.children.map((c) => `${c.studentName} (${c.className})`).join(', ')}
+                        </p>
+                      )}
+                      {conv.user?.role === 'teacher' && conv.user?.isChildHomeroomTeacher && (
+                        <div className="mt-0.5 mb-1">
+                          <span className="text-[10px] font-bold text-amber-800 bg-amber-100 border border-amber-200 px-1.5 py-0.5 rounded">
+                            🌟 የልጅዎ ክፍል ተጠሪ
+                          </span>
+                        </div>
+                      )}
+
                       <div className="flex items-center gap-1.5 text-xs text-slate-500 truncate mt-1">
                         {isLastMsgMine && (
                           <span
@@ -263,9 +277,36 @@ export default function ChatHub({ title = 'Communication Hub' }) {
                   </div>
                   <div>
                     <h3 className="text-sm font-bold text-slate-800">{selectedUser.fullName}</h3>
-                    <p className="text-[11px] text-slate-500 capitalize">
-                      {selectedUser.role} • {selectedUser.email}
-                    </p>
+                    {selectedUser.role === 'parent' && selectedUser.children?.length > 0 ? (
+                      <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                        {selectedUser.children.map((c, i) => (
+                          <span
+                            key={i}
+                            className="text-[11px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md"
+                          >
+                            🎓 {c.studentName} • ክፍል {c.className} ({c.gradeLevel})
+                          </span>
+                        ))}
+                        {selectedUser.hasHomeroomChildWithMe && (
+                          <span className="text-[10px] font-bold text-amber-800 bg-amber-100 border border-amber-300 px-1.5 py-0.5 rounded-md">
+                            🌟 እርስዎ የክፍል ተጠሪ ነዎት
+                          </span>
+                        )}
+                      </div>
+                    ) : selectedUser.role === 'teacher' && selectedUser.isChildHomeroomTeacher ? (
+                      <div className="mt-0.5">
+                        <span className="text-[11px] font-bold text-amber-800 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-md inline-flex items-center gap-1">
+                          🌟 የልጅዎ ክፍል ተጠሪ መምህር{' '}
+                          {selectedUser.homeroomFor
+                            ?.map((h) => `(${h.studentName} - ${h.className})`)
+                            .join(', ')}
+                        </span>
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-slate-500 capitalize">
+                        {selectedUser.role} • {selectedUser.email}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -414,9 +455,34 @@ export default function ChatHub({ title = 'Communication Hub' }) {
                     <div className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-sm">
                       {contact.fullName?.charAt(0) || 'U'}
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold text-slate-800">{contact.fullName}</p>
-                      <p className="text-xs text-slate-500 capitalize">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-semibold text-slate-800 truncate">{contact.fullName}</p>
+                        {contact.isChildHomeroomTeacher && (
+                          <span className="text-[10px] font-bold text-amber-800 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-full">
+                            🌟 ክፍል ተጠሪ
+                          </span>
+                        )}
+                        {contact.hasHomeroomChildWithMe && (
+                          <span className="text-[10px] font-bold text-amber-800 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-full">
+                            🌟 የክፍልዎ ተማሪ ወላጅ
+                          </span>
+                        )}
+                      </div>
+
+                      {contact.role === 'parent' && contact.children?.length > 0 && (
+                        <p className="text-xs font-semibold text-emerald-700 mt-0.5">
+                          🎓 ልጅ: {contact.children.map((c) => `${c.studentName} (ክፍል ${c.className})`).join(', ')}
+                        </p>
+                      )}
+
+                      {contact.role === 'teacher' && contact.homeroomFor?.length > 0 && (
+                        <p className="text-xs text-amber-700 mt-0.5">
+                          የ{contact.homeroomFor.map((h) => `${h.studentName} (${h.className})`).join(', ')} ክፍል ተጠሪ
+                        </p>
+                      )}
+
+                      <p className="text-xs text-slate-400 capitalize">
                         {contact.role} • {contact.email}
                       </p>
                     </div>
