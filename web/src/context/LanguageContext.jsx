@@ -12,6 +12,71 @@ const translations = {
     announcements: "Announcements",
     settings: "Settings",
     logout: "Logout",
+    password: "Password",
+    changePassword: "Change Password",
+    currentPassword: "Current Password",
+    newPassword: "New Password",
+    confirmNewPassword: "Confirm New Password",
+    passwordAtLeast6: "Password must be at least 6 characters",
+    passwordsMatch: "Passwords match",
+    passwordsDoNotMatch: "Passwords do not match",
+    passwordChangedSuccess: "Password changed successfully!",
+    failedToChangePassword: "Failed to change password",
+    cancel: "Cancel",
+    saving: "Saving...",
+
+    // Portal Titles & Menus
+    mainMenu: "Main Menu",
+    headMenu: "Head Menu",
+    teacherPortal: "Teacher Portal",
+    studentPortal: "Student Portal",
+    parentPortal: "Parent Portal",
+    adminPortal: "Admin Portal",
+    registrarPortal: "Registrar Portal",
+    headPortal: "Head Portal",
+
+    // Navigation & Features
+    teachingSchedule: "Teaching Schedule",
+    onlineExams: "Online Exams",
+    directChat: "Direct Chat",
+    timetable: "Timetable",
+    myTimetable: "Class Timetable",
+    learningHub: "Learning Hub",
+    jobPostings: "Job Postings",
+    overview: "Overview",
+    allReports: "All Reports",
+    timetables: "Timetables",
+    teacherPerformance: "Teacher Performance",
+    studentApprovals: "Student Approvals",
+    academicRules: "Academic Rules",
+
+    // Dashboard Titles
+    teacherDashboard: "Teacher Dashboard",
+    studentDashboard: "Student Dashboard",
+    parentDashboard: "Parent Dashboard",
+    adminDashboard: "Admin Dashboard",
+    headDashboard: "Head Dashboard",
+    registrarDashboard: "Registrar Dashboard",
+    welcomeBack: "Welcome back",
+
+    // Chat & Messaging
+    communicationHub: "Communication Hub",
+    teacherParentHub: "Teacher-Parent Communication Hub",
+    schoolCommHub: "School Communication Hub",
+    directCommunicationSubtitle: "Direct communication with enrolled student parents",
+    parentCommunicationSubtitle: "Direct, secure communication with your child's teachers",
+    newChat: "New Chat",
+    searchConversations: "Search conversations...",
+    writeMessage: "Write a message...",
+    send: "Send",
+    noConversationsYet: "No active conversations yet.",
+    clickNewChatToStart: "Click '+ New Chat' to start messaging.",
+    selectConversationToStart: "Select a conversation to start messaging",
+    secureCommSubtitle: "Communicate securely regarding student progress, assignments & updates.",
+    startChatWithTeacherOrParent: "Start Chat with a",
+    searchByName: "Search by name...",
+    noContactsFound: "No contacts found",
+    loadingConversations: "Loading conversations...",
     
     // Generic Words
     students: "Students",
@@ -313,6 +378,71 @@ const translations = {
     announcements: "ማስታወቂያዎች",
     settings: "ቅንብሮች",
     logout: "ውጣ",
+    password: "የይለፍ ቃል",
+    changePassword: "የይለፍ ቃል ቀይር",
+    currentPassword: "የአሁኑ የይለፍ ቃል",
+    newPassword: "አዲስ የይለፍ ቃል",
+    confirmNewPassword: "አዲሱን የይለፍ ቃል ያረጋግጡ",
+    passwordAtLeast6: "የይለፍ ቃል ቢያንስ 6 ፊደላት/ቁጥሮች መሆን አለበት",
+    passwordsMatch: "የይለፍ ቃሎች ይጣጣማሉ",
+    passwordsDoNotMatch: "የይለፍ ቃሎች አይጣጣሙም",
+    passwordChangedSuccess: "የይለፍ ቃልዎ በተሳካ ሁኔታ ተቀይሯል!",
+    failedToChangePassword: "የይለፍ ቃል መቀየር አልተቻለም",
+    cancel: "ይቅር",
+    saving: "በማስቀመጥ ላይ...",
+
+    // Portal Titles & Menus
+    mainMenu: "ዋና ማውጫ",
+    headMenu: "የኃላፊ ማውጫ",
+    teacherPortal: "የመምህራን ፖርታል",
+    studentPortal: "የተማሪዎች ፖርታል",
+    parentPortal: "የወላጆች ፖርታል",
+    adminPortal: "የአድሚን ፖርታል",
+    registrarPortal: "የሬጅስትራር ፖርታል",
+    headPortal: "የት/ቤት ኃላፊ ፖርታል",
+
+    // Navigation & Features
+    teachingSchedule: "የማስተማሪያ መርሃ-ግብር",
+    onlineExams: "የመስመር ላይ ፈተናዎች",
+    directChat: "የቀጥታ ውይይት (ቻት)",
+    timetable: "የክፍለ-ጊዜ ሰሌዳ",
+    myTimetable: "የክፍለ-ጊዜ ሰሌዳ",
+    learningHub: "የትምህርት መርጃ ማዕከል",
+    jobPostings: "የስራ ማስታወቂያዎች",
+    overview: "አጠቃላይ እይታ",
+    allReports: "ሁሉም ሪፖርቶች",
+    timetables: "የክፍለ-ጊዜ ሰሌዳዎች",
+    teacherPerformance: "የመምህራን አፈጻጸም",
+    studentApprovals: "የተማሪዎች ምዝገባ ማጽደቂያ",
+    academicRules: "የትምህርት ደንቦች",
+
+    // Dashboard Titles
+    teacherDashboard: "የመምህር ዳሽቦርድ",
+    studentDashboard: "የተማሪ ዳሽቦርድ",
+    parentDashboard: "የወላጅ ዳሽቦርድ",
+    adminDashboard: "የአድሚን ዳሽቦርድ",
+    headDashboard: "የት/ቤት ኃላፊ ዳሽቦርድ",
+    registrarDashboard: "የሬጅስትራር ዳሽቦርድ",
+    welcomeBack: "እንኳን ደህና መጡ",
+
+    // Chat & Messaging
+    communicationHub: "የግንኙነት ማዕከል",
+    teacherParentHub: "የመምህራን እና ወላጆች ግንኙነት ማዕከል",
+    schoolCommHub: "የትምህርት ቤት ግንኙነት ማዕከል",
+    directCommunicationSubtitle: "ከተማሪዎች ወላጆች ጋር የሚደረግ የቀጥታ ግንኙነት",
+    parentCommunicationSubtitle: "ከልጅዎ መምህራን ጋር ደህንነቱ የተጠበቀ የቀጥታ ግንኙነት",
+    newChat: "አዲስ ጭውውት",
+    searchConversations: "ጭውውቶችን ይፈልጉ...",
+    writeMessage: "መልእክት ይጻፉ...",
+    send: "ላክ",
+    noConversationsYet: "እስካሁን ምንም ንግግሮች የሉም።",
+    clickNewChatToStart: "መልእክት ለመላክ '+ አዲስ ጭውውት' ይጫኑ።",
+    selectConversationToStart: "ውይይት ለመጀመር ወይም ለማየት አንዱን ይምረጡ",
+    secureCommSubtitle: "ስለ ተማሪ ውጤት፣ የቤት ስራ እና ወቅታዊ መረጃ በቀላሉ ይወያዩ።",
+    startChatWithTeacherOrParent: "ውይይት ይጀምሩ ከ",
+    searchByName: "በስም ይፈልጉ...",
+    noContactsFound: "ምንም ተጠቃሚ አልተገኘም",
+    loadingConversations: "ጭውውቶች በመጫን ላይ...",
     
     // Generic Words
     students: "ተማሪዎች",
@@ -617,7 +747,7 @@ export function LanguageProvider({ children }) {
   };
 
   const t = (key) => {
-    return translations[language][key] || key;
+    return translations[language]?.[key] || translations['en']?.[key] || key;
   };
 
   return (

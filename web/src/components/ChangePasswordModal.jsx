@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import API from '../services/api';
+import { useLanguage } from '../context/useLanguage';
 
 export default function ChangePasswordModal({ onClose }) {
+  const { t } = useLanguage();
   const [form, setForm] = useState({
     currentPassword: '',
     newPassword: '',
@@ -18,12 +20,12 @@ export default function ChangePasswordModal({ onClose }) {
     setMessage(null);
 
     if (form.newPassword !== form.confirmPassword) {
-      setMessage({ type: 'error', text: 'New passwords do not match' });
+      setMessage({ type: 'error', text: t('passwordsDoNotMatch') || 'New passwords do not match' });
       return;
     }
 
     if (form.newPassword.length < 6) {
-      setMessage({ type: 'error', text: 'Password must be at least 6 characters' });
+      setMessage({ type: 'error', text: t('passwordAtLeast6') || 'Password must be at least 6 characters' });
       return;
     }
 
@@ -35,7 +37,7 @@ export default function ChangePasswordModal({ onClose }) {
         newPassword: form.newPassword
       });
 
-      setMessage({ type: 'success', text: 'Password changed successfully!' });
+      setMessage({ type: 'success', text: t('passwordChangedSuccess') || 'Password changed successfully!' });
       setForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
 
       setTimeout(() => {
@@ -44,7 +46,7 @@ export default function ChangePasswordModal({ onClose }) {
     } catch (err) {
       setMessage({
         type: 'error',
-        text: err.response?.data?.message || 'Failed to change password'
+        text: err.response?.data?.message || t('failedToChangePassword') || 'Failed to change password'
       });
     } finally {
       setSaving(false);
@@ -55,7 +57,7 @@ export default function ChangePasswordModal({ onClose }) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-800">🔐 Change Password</h2>
+          <h2 className="text-xl font-bold text-gray-800">🔐 {t('changePassword') || 'Change Password'}</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
@@ -80,7 +82,7 @@ export default function ChangePasswordModal({ onClose }) {
           {/* Current Password */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Current Password
+              {t('currentPassword') || 'Current Password'}
             </label>
             <div className="relative">
               <input
@@ -105,7 +107,7 @@ export default function ChangePasswordModal({ onClose }) {
           {/* New Password */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              New Password
+              {t('newPassword') || 'New Password'}
             </label>
             <div className="relative">
               <input
@@ -131,7 +133,7 @@ export default function ChangePasswordModal({ onClose }) {
           {/* Confirm Password */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Confirm New Password
+              {t('confirmNewPassword') || 'Confirm New Password'}
             </label>
             <div className="relative">
               <input
@@ -157,9 +159,9 @@ export default function ChangePasswordModal({ onClose }) {
           {form.newPassword && form.confirmPassword && (
             <div className="text-sm">
               {form.newPassword === form.confirmPassword ? (
-                <span className="text-green-600">✅ Passwords match</span>
+                <span className="text-green-600">✅ {t('passwordsMatch') || 'Passwords match'}</span>
               ) : (
-                <span className="text-red-600">❌ Passwords do not match</span>
+                <span className="text-red-600">❌ {t('passwordsDoNotMatch') || 'Passwords do not match'}</span>
               )}
             </div>
           )}
@@ -170,14 +172,14 @@ export default function ChangePasswordModal({ onClose }) {
               disabled={saving}
               className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white py-2 rounded-lg"
             >
-              {saving ? 'Saving...' : 'Change Password'}
+              {saving ? (t('saving') || 'Saving...') : (t('changePassword') || 'Change Password')}
             </button>
             <button
               type="button"
               onClick={onClose}
               className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
             >
-              Cancel
+              {t('cancel') || 'Cancel'}
             </button>
           </div>
         </form>

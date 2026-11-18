@@ -32,7 +32,7 @@ export default function StudentDashboard() {
             </div>
             <div>
               <h2 className="text-base font-bold text-slate-800 tracking-tight">Wachemo</h2>
-              <p className="text-xs text-slate-500 font-medium">Student Portal</p>
+              <p className="text-xs text-slate-500 font-medium">{t('studentPortal') || 'Student Portal'}</p>
             </div>
             <button onClick={() => setIsMobileMenuOpen(false)} className="md:hidden ml-auto text-slate-400 hover:text-slate-600">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -41,7 +41,7 @@ export default function StudentDashboard() {
         </div>
 
         <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-2">
-          <p className="px-2 text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Main Menu</p>
+          <p className="px-2 text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">{t('mainMenu') || 'Main Menu'}</p>
           <SidebarLink to="/student" icon="📊" active={location.pathname === '/student'} onClick={() => setIsMobileMenuOpen(false)}>
             {t('dashboard')}
           </SidebarLink>
@@ -76,7 +76,7 @@ export default function StudentDashboard() {
             </div>
           </div>
           <div className="flex gap-2">
-            <button onClick={() => setShowPasswordModal(true)} className="flex-1 text-xs bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 py-2 rounded-lg transition font-medium">Password</button>
+            <button onClick={() => setShowPasswordModal(true)} className="flex-1 text-xs bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 py-2 rounded-lg transition font-medium">{t('password') || 'Password'}</button>
             <button onClick={logout} className="flex-1 text-xs bg-red-50 hover:bg-red-100 text-red-600 py-2 rounded-lg transition font-medium">{t('logout')}</button>
           </div>
         </div>

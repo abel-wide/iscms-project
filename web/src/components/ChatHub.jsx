@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import API from '../services/api';
 import { useAuth } from '../context/useAuth';
+import { useLanguage } from '../context/useLanguage';
 
 export default function ChatHub({ title = 'Communication Hub' }) {
   const { user } = useAuth();
+  const { t, language } = useLanguage();
   const currentUserId = (user?.id || user?._id)?.toString();
 
   const [conversations, setConversations] = useState([]);
@@ -127,25 +129,31 @@ export default function ChatHub({ title = 'Communication Hub' }) {
     c.fullName?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const displayTitle = 
+    title === 'Teacher-Parent Communication Hub' ? (t('teacherParentHub') || title) :
+    title === 'School Communication Hub' ? (t('schoolCommHub') || title) :
+    title === 'Communication Hub' ? (t('communicationHub') || title) :
+    (t(title) || title);
+
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-[calc(100vh-140px)] min-h-[500px]">
       {/* Header */}
       <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
         <div>
           <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-            <span>💬</span> {title}
+            <span>💬</span> {displayTitle}
           </h2>
           <p className="text-xs text-slate-500">
             {user?.role === 'parent'
-              ? "Direct, secure communication with your child's teachers"
-              : 'Direct communication with enrolled student parents'}
+              ? (t('parentCommunicationSubtitle') || "Direct, secure communication with your child's teachers")
+              : (t('directCommunicationSubtitle') || 'Direct communication with enrolled student parents')}
           </p>
         </div>
         <button
           onClick={() => setShowNewChatModal(true)}
           className="text-xs md:text-sm bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded-xl transition shadow-sm flex items-center gap-1.5"
         >
-          <span>+</span> New Chat
+          <span>+</span> {t('newChat') || 'New Chat'}
         </button>
       </div>
 
@@ -160,7 +168,7 @@ export default function ChatHub({ title = 'Communication Hub' }) {
           <div className="p-3 border-b border-slate-200 bg-white">
             <input
               type="text"
-              placeholder="Search conversations..."
+              placeholder={t('searchConversations') || 'Search conversations...'}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full px-3 py-2 text-xs bg-slate-100 rounded-lg border-none focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -169,11 +177,11 @@ export default function ChatHub({ title = 'Communication Hub' }) {
 
           <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
             {loadingConv ? (
-              <div className="p-8 text-center text-xs text-slate-400">Loading conversations...</div>
+              <div className="p-8 text-center text-xs text-slate-400">{t('loadingConversations') || 'Loading conversations...'}</div>
             ) : filteredConversations.length === 0 ? (
               <div className="p-8 text-center text-xs text-slate-400">
-                <p>No active conversations yet.</p>
-                <p className="mt-1">Click "+ New Chat" to start messaging.</p>
+                <p>{t('noConversationsYet') || 'No active conversations yet.'}</p>
+                <p className="mt-1">{t('clickNewChatToStart') || 'Click "+ New Chat" to start messaging.'}</p>
               </div>
             ) : (
               filteredConversations.map((conv) => {
@@ -389,7 +397,11 @@ export default function ChatHub({ title = 'Communication Hub' }) {
               <form onSubmit={handleSendMessage} className="p-3 border-t border-slate-200 bg-white flex gap-2">
                 <input
                   type="text"
-                  placeholder={`Write a message to ${selectedUser.fullName}...`}
+                  placeholder={
+                    language === 'am'
+                      ? `ለ ${selectedUser.fullName} መልእክት ይጻፉ...`
+                      : `Write a message to ${selectedUser.fullName}...`
+                  }
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   className="flex-1 px-4 py-2.5 text-sm bg-slate-100 rounded-xl border border-transparent focus:outline-none focus:bg-white focus:border-indigo-500"
@@ -399,15 +411,19 @@ export default function ChatHub({ title = 'Communication Hub' }) {
                   disabled={!newMessage.trim() || sending}
                   className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white rounded-xl font-medium text-sm transition shadow-sm"
                 >
-                  {sending ? '...' : 'Send'}
+                  {sending ? '...' : (t('send') || 'Send')}
                 </button>
               </form>
             </>
           ) : (
             <div className="text-center p-8 text-slate-400 my-auto">
               <span className="text-4xl block mb-2">💬</span>
-              <p className="text-sm font-semibold text-slate-600">Select a conversation or start a new chat</p>
-              <p className="text-xs mt-1">Communicate securely regarding student progress, assignments & updates.</p>
+              <p className="text-sm font-semibold text-slate-600">
+                {t('selectConversationToStart') || 'Select a conversation or start a new chat'}
+              </p>
+              <p className="text-xs mt-1">
+                {t('secureCommSubtitle') || 'Communicate securely regarding student progress, assignments & updates.'}
+              </p>
             </div>
           )}
         </div>
@@ -419,7 +435,10 @@ export default function ChatHub({ title = 'Communication Hub' }) {
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-bold text-slate-800">
-                Start Chat with a {user?.role === 'parent' ? 'Teacher' : 'Parent'}
+                {t('startChatWithTeacherOrParent') || 'Start Chat with a'}{' '}
+                {user?.role === 'parent'
+                  ? (language === 'am' ? 'መምህር' : 'Teacher')
+                  : (language === 'am' ? 'ወላጅ' : 'Parent')}
               </h3>
               <button
                 onClick={() => setShowNewChatModal(false)}
@@ -432,7 +451,7 @@ export default function ChatHub({ title = 'Communication Hub' }) {
             <div className="mb-4">
               <input
                 type="text"
-                placeholder="Search by name..."
+                placeholder={t('searchByName') || 'Search by name...'}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full px-3 py-2 text-sm bg-slate-100 rounded-lg border-none focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -441,7 +460,7 @@ export default function ChatHub({ title = 'Communication Hub' }) {
 
             <div className="max-h-60 overflow-y-auto divide-y divide-slate-100">
               {filteredContacts.length === 0 ? (
-                <p className="py-6 text-center text-xs text-slate-400">No contacts found</p>
+                <p className="py-6 text-center text-xs text-slate-400">{t('noContactsFound') || 'No contacts found'}</p>
               ) : (
                 filteredContacts.map((contact) => (
                   <button
