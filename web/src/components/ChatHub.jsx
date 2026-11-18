@@ -4,6 +4,8 @@ import { useAuth } from '../context/useAuth';
 
 export default function ChatHub({ title = 'Communication Hub' }) {
   const { user } = useAuth();
+  const currentUserId = (user?.id || user?._id)?.toString();
+
   const [conversations, setConversations] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -20,6 +22,9 @@ export default function ChatHub({ title = 'Communication Hub' }) {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  // Helper to extract user ID safely
+  const getUserId = (u) => (u?._id || u?.id)?.toString();
 
   // Load conversations
   const fetchConversations = async () => {
@@ -49,6 +54,7 @@ export default function ChatHub({ title = 'Communication Hub' }) {
 
   // Load message history with selected user
   const fetchMessages = async (otherUserId) => {
+    if (!otherUserId) return;
     try {
       const res = await API.get(`/messages/history/${otherUserId}`);
       if (res.data?.success) {
@@ -68,14 +74,16 @@ export default function ChatHub({ title = 'Communication Hub' }) {
 
   // Poll for messages when a chat is open
   useEffect(() => {
-    if (!selectedUser?._id) return;
+    const otherId = getUserId(selectedUser);
+    if (!otherId) return;
+
     setLoadingMessages(true);
-    fetchMessages(selectedUser._id);
+    fetchMessages(otherId);
 
     const interval = setInterval(() => {
-      fetchMessages(selectedUser._id);
+      fetchMessages(otherId);
       fetchConversations();
-    }, 3500);
+    }, 3000);
 
     return () => clearInterval(interval);
   }, [selectedUser]);
@@ -86,7 +94,8 @@ export default function ChatHub({ title = 'Communication Hub' }) {
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim() || !selectedUser?._id || sending) return;
+    const otherId = getUserId(selectedUser);
+    if (!newMessage.trim() || !otherId || sending) return;
 
     const messageText = newMessage.trim();
     setNewMessage('');
@@ -94,7 +103,7 @@ export default function ChatHub({ title = 'Communication Hub' }) {
 
     try {
       const res = await API.post('/messages', {
-        recipientId: selectedUser._id,
+        recipientId: otherId,
         text: messageText,
       });
 
@@ -142,7 +151,7 @@ export default function ChatHub({ title = 'Communication Hub' }) {
 
       {/* Main Chat Body */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left: Conversations List (Hidden on mobile if user selected) */}
+        {/* Left: Conversations List */}
         <div
           className={`w-full md:w-80 lg:w-96 border-r border-slate-200 flex flex-col bg-slate-50/50 ${
             selectedUser ? 'hidden md:flex' : 'flex'
@@ -168,14 +177,18 @@ export default function ChatHub({ title = 'Communication Hub' }) {
               </div>
             ) : (
               filteredConversations.map((conv) => {
-                const isSelected = selectedUser?._id === conv.user?._id;
-                const isLastMsgMine =
-                  conv.lastMessage?.sender === user?._id ||
-                  conv.lastMessage?.sender?._id === user?._id;
+                const convUserId = getUserId(conv.user);
+                const isSelected = getUserId(selectedUser) === convUserId;
+                const lastMsgSenderId = (
+                  conv.lastMessage?.sender?._id ||
+                  conv.lastMessage?.sender?.id ||
+                  conv.lastMessage?.sender
+                )?.toString();
+                const isLastMsgMine = currentUserId && lastMsgSenderId === currentUserId;
 
                 return (
                   <button
-                    key={conv.user?._id}
+                    key={convUserId || Math.random()}
                     onClick={() => setSelectedUser(conv.user)}
                     className={`w-full text-left p-3.5 transition flex items-start gap-3 ${
                       isSelected ? 'bg-indigo-50/90 border-l-4 border-indigo-600' : 'hover:bg-slate-100/70'
@@ -199,13 +212,17 @@ export default function ChatHub({ title = 'Communication Hub' }) {
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-1 text-xs text-slate-500 truncate">
+                      <div className="flex items-center gap-1.5 text-xs text-slate-500 truncate mt-1">
                         {isLastMsgMine && (
                           <span
-                            className={conv.lastMessage?.read ? 'text-cyan-600 font-bold' : 'text-slate-400 font-bold'}
-                            title={conv.lastMessage?.read ? 'Read' : 'Delivered'}
+                            className={`font-bold text-[11px] px-1.5 py-0.2 rounded ${
+                              conv.lastMessage?.read
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : 'bg-slate-200 text-slate-600'
+                            }`}
+                            title={conv.lastMessage?.read ? 'ተነቧል (Read)' : 'አልተነበበም (Delivered)'}
                           >
-                            {conv.lastMessage?.read ? '✓✓' : '✓'}
+                            {conv.lastMessage?.read ? '✓✓ ተነቧል' : '✓ አልተነበበም'}
                           </span>
                         )}
                         <span className="truncate">{conv.lastMessage?.text || 'No messages'}</span>
@@ -218,7 +235,7 @@ export default function ChatHub({ title = 'Communication Hub' }) {
 
                     {conv.unreadCount > 0 && (
                       <span className="shrink-0 bg-emerald-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-full shadow-sm animate-pulse">
-                        {conv.unreadCount}
+                        {conv.unreadCount} አዲስ
                       </span>
                     )}
                   </button>
@@ -253,19 +270,19 @@ export default function ChatHub({ title = 'Communication Hub' }) {
                 </div>
 
                 {/* Delivery / Read Status Legend */}
-                <div className="hidden sm:flex items-center gap-3 text-[11px] bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
-                  <span className="flex items-center gap-1 text-slate-500">
-                    <span className="font-bold text-slate-600">✓</span> ደርሷል (Delivered)
+                <div className="flex items-center gap-2 text-[11px] bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+                  <span className="flex items-center gap-1 text-amber-700 font-medium">
+                    <span className="font-bold">✓</span> አልተነበበም / ደርሷል
                   </span>
                   <span className="text-slate-300">•</span>
-                  <span className="flex items-center gap-1 text-cyan-600 font-semibold">
-                    <span className="font-bold">✓✓</span> ተነቧል (Read)
+                  <span className="flex items-center gap-1 text-emerald-700 font-bold">
+                    <span>✓✓</span> ተነቧል
                   </span>
                 </div>
               </div>
 
               {/* Messages Scroll Area */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {loadingMessages ? (
                   <div className="text-center py-8 text-xs text-slate-400">Loading chat history...</div>
                 ) : messages.length === 0 ? (
@@ -275,57 +292,65 @@ export default function ChatHub({ title = 'Communication Hub' }) {
                   </div>
                 ) : (
                   messages.map((msg) => {
-                    const senderId = msg.sender?._id || msg.sender;
-                    const isMe = senderId === user?._id;
+                    const senderId = (msg.sender?._id || msg.sender?.id || msg.sender)?.toString();
+                    const isMe = Boolean(currentUserId && senderId === currentUserId);
 
                     return (
                       <div key={msg._id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                         <div
-                          className={`max-w-[85%] md:max-w-[70%] rounded-2xl px-4 py-2.5 text-sm shadow-sm ${
+                          className={`max-w-[85%] md:max-w-[70%] rounded-2xl px-4 py-3 text-sm shadow-sm transition ${
                             isMe
                               ? 'bg-indigo-600 text-white rounded-br-none'
                               : 'bg-white text-slate-800 border border-slate-200 rounded-bl-none'
                           }`}
                         >
                           <p className="break-words leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+
+                          {/* Message Footer: Timestamp and Explicit Read/Unread Badge */}
                           <div
-                            className={`text-[10px] mt-1.5 text-right flex items-center justify-end gap-1.5 ${
-                              isMe ? 'text-indigo-100' : 'text-slate-400'
+                            className={`mt-2 pt-1 border-t flex items-center justify-between gap-3 ${
+                              isMe ? 'border-indigo-500/50 text-indigo-100' : 'border-slate-100 text-slate-500'
                             }`}
                           >
-                            <span>
+                            <span className="text-[10px]">
                               {new Date(msg.createdAt).toLocaleTimeString([], {
                                 hour: '2-digit',
                                 minute: '2-digit',
                               })}
                             </span>
 
-                            {/* Delivery & Read Receipts for Sender */}
-                            {isMe && (
-                              msg.read ? (
-                                <span
-                                  className="inline-flex items-center gap-1 text-cyan-300 font-bold ml-1 bg-indigo-700/60 px-1.5 py-0.5 rounded shadow-sm text-[10px]"
-                                  title={
-                                    msg.readAt
-                                      ? `Read at ${new Date(msg.readAt).toLocaleTimeString([], {
-                                          hour: '2-digit',
-                                          minute: '2-digit',
-                                        })}`
-                                      : 'Read by recipient'
-                                  }
-                                >
-                                  <span>✓✓</span>
-                                  <span>ተነቧል</span>
-                                </span>
-                              ) : (
-                                <span
-                                  className="inline-flex items-center gap-1 text-indigo-200 ml-1 bg-indigo-700/30 px-1.5 py-0.5 rounded text-[10px]"
-                                  title="Delivered to recipient"
-                                >
-                                  <span>✓</span>
-                                  <span>ደርሷል</span>
-                                </span>
-                              )
+                            {/* Status: Directly on each message bubble */}
+                            {msg.read ? (
+                              <span
+                                className={`inline-flex items-center gap-1 font-bold text-[10px] px-2 py-0.5 rounded-full shadow-xs ${
+                                  isMe
+                                    ? 'bg-emerald-500 text-white'
+                                    : 'bg-emerald-100 text-emerald-800'
+                                }`}
+                                title={
+                                  msg.readAt
+                                    ? `ተነቧል በ ${new Date(msg.readAt).toLocaleTimeString([], {
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                      })}`
+                                    : 'ተነቧል (Read)'
+                                }
+                              >
+                                <span>✓✓</span>
+                                <span>ተነቧል</span>
+                              </span>
+                            ) : (
+                              <span
+                                className={`inline-flex items-center gap-1 font-semibold text-[10px] px-2 py-0.5 rounded-full ${
+                                  isMe
+                                    ? 'bg-amber-400 text-slate-900'
+                                    : 'bg-amber-100 text-amber-900'
+                                }`}
+                                title="ደርሷል ግን እስካሁን አልተነበበም (Delivered / Unread)"
+                              >
+                                <span>✓</span>
+                                <span>አልተነበበም</span>
+                              </span>
                             )}
                           </div>
                         </div>
@@ -396,7 +421,7 @@ export default function ChatHub({ title = 'Communication Hub' }) {
               ) : (
                 filteredContacts.map((contact) => (
                   <button
-                    key={contact._id}
+                    key={getUserId(contact) || Math.random()}
                     onClick={() => {
                       setSelectedUser(contact);
                       setShowNewChatModal(false);
