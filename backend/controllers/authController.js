@@ -36,7 +36,7 @@ exports.register = async (req, res) => {
       return res.status(400).json({ message: 'Email already in use' });
     }
 
-    const validRoles = ['admin', 'teacher', 'student', 'parent', 'registrar'];
+    const validRoles = ['admin', 'teacher', 'student', 'parent', 'registrar', 'head'];
     if (!validRoles.includes(role)) {
       return res.status(400).json({
         message: `Invalid role. Must be one of: ${validRoles.join(', ')}`
