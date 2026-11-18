@@ -17,6 +17,7 @@ const userRoutes = require('./routes/userRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 const timetableRoutes = require('./routes/timetableRoutes');
 const examRoutes = require('./routes/examRoutes');
+const jobRoutes = require('./routes/jobRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -82,6 +83,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/timetable', timetableRoutes);
 app.use('/api/exams', examRoutes);
+app.use('/api/jobs', jobRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'ISCMS Backend is running!' });

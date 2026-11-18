@@ -59,6 +59,8 @@ import HeadReports from './pages/head/HeadReports';
 import HeadTimetable from './pages/head/HeadTimetable';
 import HeadTeacherPerformance from './pages/head/HeadTeacherPerformance';
 import HeadAnnouncements from './pages/head/HeadAnnouncements';
+import AdminJobPostings from './pages/admin/AdminJobPostings';
+import JobBoard from './pages/JobBoard';
 import { useMobileApp } from './hooks/useMobileApp';
 
 function MobileAppHandler() {
@@ -100,6 +102,7 @@ export default function App() {
             <Route path="attendance" element={<AttendanceReport />} />
             <Route path="timetable" element={<TimetableManagement />} />
             <Route path="chat" element={<ChatHub title="School Communication Hub" />} />
+            <Route path="jobs" element={<AdminJobPostings />} />
           </Route>
 
           {/* Teacher routes */}
@@ -180,6 +183,9 @@ export default function App() {
           {/* Payment Callback Route */}
           <Route path="/payment/callback" element={<PaymentCallback />} />
           <Route path="/payment/success" element={<PaymentCallback />} />
+
+          {/* Public Job Board */}
+          <Route path="/careers" element={<JobBoard />} />
 
           {/* Head routes */}
           <Route
