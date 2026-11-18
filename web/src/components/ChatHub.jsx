@@ -215,14 +215,10 @@ export default function ChatHub({ title = 'Communication Hub' }) {
                       <div className="flex items-center gap-1.5 text-xs text-slate-500 truncate mt-1">
                         {isLastMsgMine && (
                           <span
-                            className={`font-bold text-[11px] px-1.5 py-0.2 rounded ${
-                              conv.lastMessage?.read
-                                ? 'bg-emerald-100 text-emerald-700'
-                                : 'bg-slate-200 text-slate-600'
-                            }`}
-                            title={conv.lastMessage?.read ? 'ተነቧል (Read)' : 'አልተነበበም (Delivered)'}
+                            className="font-semibold text-[10px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-700"
+                            title="ተልኳል (Sent)"
                           >
-                            {conv.lastMessage?.read ? '✓✓ ተነቧል' : '✓ አልተነበበም'}
+                            ✓ ተልኳል
                           </span>
                         )}
                         <span className="truncate">{conv.lastMessage?.text || 'No messages'}</span>
@@ -268,17 +264,6 @@ export default function ChatHub({ title = 'Communication Hub' }) {
                     </p>
                   </div>
                 </div>
-
-                {/* Delivery / Read Status Legend */}
-                <div className="flex items-center gap-2 text-[11px] bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
-                  <span className="flex items-center gap-1 text-amber-700 font-medium">
-                    <span className="font-bold">✓</span> አልተነበበም / ደርሷል
-                  </span>
-                  <span className="text-slate-300">•</span>
-                  <span className="flex items-center gap-1 text-emerald-700 font-bold">
-                    <span>✓✓</span> ተነቧል
-                  </span>
-                </div>
               </div>
 
               {/* Messages Scroll Area */}
@@ -320,13 +305,17 @@ export default function ChatHub({ title = 'Communication Hub' }) {
                             </span>
 
                             {/* Status: Directly on each message bubble */}
-                            {msg.read ? (
+                            {isMe ? (
                               <span
-                                className={`inline-flex items-center gap-1 font-bold text-[10px] px-2 py-0.5 rounded-full shadow-xs ${
-                                  isMe
-                                    ? 'bg-emerald-500 text-white'
-                                    : 'bg-emerald-100 text-emerald-800'
-                                }`}
+                                className="inline-flex items-center gap-1 font-semibold text-[10px] px-2 py-0.5 rounded-full bg-indigo-700/60 text-indigo-100 border border-indigo-400/30"
+                                title="መልእክቱ ተልኳል (Sent / Delivered)"
+                              >
+                                <span className="font-bold">✓</span>
+                                <span>ተልኳል</span>
+                              </span>
+                            ) : msg.read ? (
+                              <span
+                                className="inline-flex items-center gap-1 font-bold text-[10px] px-2 py-0.5 rounded-full shadow-xs bg-emerald-100 text-emerald-800 border border-emerald-200"
                                 title={
                                   msg.readAt
                                     ? `ተነቧል በ ${new Date(msg.readAt).toLocaleTimeString([], {
@@ -341,15 +330,11 @@ export default function ChatHub({ title = 'Communication Hub' }) {
                               </span>
                             ) : (
                               <span
-                                className={`inline-flex items-center gap-1 font-semibold text-[10px] px-2 py-0.5 rounded-full ${
-                                  isMe
-                                    ? 'bg-amber-400 text-slate-900'
-                                    : 'bg-amber-100 text-amber-900'
-                                }`}
-                                title="ደርሷል ግን እስካሁን አልተነበበም (Delivered / Unread)"
+                                className="inline-flex items-center gap-1 font-semibold text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200"
+                                title="አዲስ መልእክት (Unread)"
                               >
                                 <span>✓</span>
-                                <span>አልተነበበም</span>
+                                <span>አዲስ</span>
                               </span>
                             )}
                           </div>
