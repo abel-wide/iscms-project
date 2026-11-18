@@ -48,6 +48,11 @@ import TimetableManagement from './pages/admin/TimetableManagement';
 import MyTimetable from './pages/student/MyTimetable';
 import MyTeachingSchedule from './pages/teacher/MyTeachingSchedule';
 import ChildTimetable from './pages/parent/ChildTimetable';
+import TeacherExamList from './pages/teacher/TeacherExamList';
+import CreateExam from './pages/teacher/CreateExam';
+import ExamResults from './pages/teacher/ExamResults';
+import StudentExamList from './pages/student/StudentExamList';
+import OnlineExam from './pages/student/OnlineExam';
 import { useMobileApp } from './hooks/useMobileApp';
 
 function MobileAppHandler() {
@@ -106,6 +111,9 @@ export default function App() {
             <Route path="resources" element={<UploadResources />} />
             <Route path="announcements" element={<ClassAnnouncements />} />
             <Route path="timetable" element={<MyTeachingSchedule />} />
+            <Route path="exams" element={<TeacherExamList />} />
+            <Route path="exams/create" element={<CreateExam />} />
+            <Route path="exams/:id/results" element={<ExamResults />} />
             <Route path="chat" element={<ChatHub title="Teacher-Parent Communication Hub" />} />
           </Route>
 
@@ -123,6 +131,8 @@ export default function App() {
             <Route path="attendance" element={<MyAttendance />} />
             <Route path="resources" element={<LearningHub />} />
             <Route path="timetable" element={<MyTimetable />} />
+            <Route path="exams" element={<StudentExamList />} />
+            <Route path="exams/:id" element={<OnlineExam />} />
             <Route path="notifications" element={<MyNotifications />} />
           </Route>
 

@@ -57,6 +57,9 @@ export default function StudentDashboard() {
           <SidebarLink to="/student/timetable" icon="🗓️" active={location.pathname === '/student/timetable'} onClick={() => setIsMobileMenuOpen(false)}>
             {t('timetable') || 'Class Timetable'}
           </SidebarLink>
+          <SidebarLink to="/student/exams" icon="📝" active={location.pathname.startsWith('/student/exams')} onClick={() => setIsMobileMenuOpen(false)}>
+            {t('onlineExams') || 'Online Exams'}
+          </SidebarLink>
           <SidebarLink to="/student/notifications" icon="📢" active={location.pathname === '/student/notifications'} onClick={() => setIsMobileMenuOpen(false)}>
             {t('notifications') || 'Notifications'}
           </SidebarLink>
