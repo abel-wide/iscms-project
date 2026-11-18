@@ -215,10 +215,14 @@ export default function ChatHub({ title = 'Communication Hub' }) {
                       <div className="flex items-center gap-1.5 text-xs text-slate-500 truncate mt-1">
                         {isLastMsgMine && (
                           <span
-                            className="font-semibold text-[10px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-700"
-                            title="ተልኳል (Sent)"
+                            className={`font-semibold text-[10px] px-1.5 py-0.5 rounded ${
+                              conv.lastMessage?.read
+                                ? 'bg-emerald-100 text-emerald-800 font-bold'
+                                : 'bg-slate-200 text-slate-700'
+                            }`}
+                            title={conv.lastMessage?.read ? 'ተነቧል (Read)' : 'ደርሷል (Delivered)'}
                           >
-                            ✓ ተልኳል
+                            {conv.lastMessage?.read ? '✓✓ ተነቧል' : '✓ ደርሷል'}
                           </span>
                         )}
                         <span className="truncate">{conv.lastMessage?.text || 'No messages'}</span>
@@ -291,10 +295,10 @@ export default function ChatHub({ title = 'Communication Hub' }) {
                         >
                           <p className="break-words leading-relaxed whitespace-pre-wrap">{msg.text}</p>
 
-                          {/* Message Footer: Timestamp and Explicit Read/Unread Badge */}
+                          {/* Message Footer: Timestamp and Read/Delivered status for sender only */}
                           <div
                             className={`mt-2 pt-1 border-t flex items-center justify-between gap-3 ${
-                              isMe ? 'border-indigo-500/50 text-indigo-100' : 'border-slate-100 text-slate-500'
+                              isMe ? 'border-indigo-500/50 text-indigo-100' : 'border-slate-100 text-slate-400'
                             }`}
                           >
                             <span className="text-[10px]">
@@ -304,38 +308,32 @@ export default function ChatHub({ title = 'Communication Hub' }) {
                               })}
                             </span>
 
-                            {/* Status: Directly on each message bubble */}
-                            {isMe ? (
-                              <span
-                                className="inline-flex items-center gap-1 font-semibold text-[10px] px-2 py-0.5 rounded-full bg-indigo-700/60 text-indigo-100 border border-indigo-400/30"
-                                title="መልእክቱ ተልኳል (Sent / Delivered)"
-                              >
-                                <span className="font-bold">✓</span>
-                                <span>ተልኳል</span>
-                              </span>
-                            ) : msg.read ? (
-                              <span
-                                className="inline-flex items-center gap-1 font-bold text-[10px] px-2 py-0.5 rounded-full shadow-xs bg-emerald-100 text-emerald-800 border border-emerald-200"
-                                title={
-                                  msg.readAt
-                                    ? `ተነቧል በ ${new Date(msg.readAt).toLocaleTimeString([], {
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                      })}`
-                                    : 'ተነቧል (Read)'
-                                }
-                              >
-                                <span>✓✓</span>
-                                <span>ተነቧል</span>
-                              </span>
-                            ) : (
-                              <span
-                                className="inline-flex items-center gap-1 font-semibold text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200"
-                                title="አዲስ መልእክት (Unread)"
-                              >
-                                <span>✓</span>
-                                <span>አዲስ</span>
-                              </span>
+                            {/* Status: ONLY for sender (isMe). Recipient has no ticks/badges! */}
+                            {isMe && (
+                              msg.read ? (
+                                <span
+                                  className="inline-flex items-center gap-1 font-bold text-[10px] px-2 py-0.5 rounded-full shadow-xs bg-emerald-500 text-white"
+                                  title={
+                                    msg.readAt
+                                      ? `ተነቧል በ ${new Date(msg.readAt).toLocaleTimeString([], {
+                                          hour: '2-digit',
+                                          minute: '2-digit',
+                                        })}`
+                                      : 'ተነቧል (Read)'
+                                  }
+                                >
+                                  <span>✓✓</span>
+                                  <span>ተነቧል</span>
+                                </span>
+                              ) : (
+                                <span
+                                  className="inline-flex items-center gap-1 font-semibold text-[10px] px-2 py-0.5 rounded-full bg-indigo-700/60 text-indigo-100 border border-indigo-400/30"
+                                  title="ደርሷል ግን እስካሁን አልተነበበም (Delivered)"
+                                >
+                                  <span className="font-bold">✓</span>
+                                  <span>ደርሷል</span>
+                                </span>
+                              )
                             )}
                           </div>
                         </div>
