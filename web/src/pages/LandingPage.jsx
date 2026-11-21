@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 
 // 👇 የምስል ስላይድ ኮምፖኔንት
@@ -60,8 +60,20 @@ function ImageSlider() {
   );
 }
 
-export default function LandingPage() {
+export default function LandingPage({ defaultSection }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    if (defaultSection === 'about' || location.pathname === '/about' || location.hash === '#about') {
+      setTimeout(() => {
+        const el = document.getElementById('about');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 150);
+    }
+  }, [defaultSection, location.pathname, location.hash]);
 
   return (
     <div className="min-h-screen bg-white font-sans text-gray-900">

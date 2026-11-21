@@ -204,6 +204,7 @@ export default function App() {
           </Route>
 
           <Route path="/" element={<LandingPage />} />
+          <Route path="/about" element={<LandingPage defaultSection="about" />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
