@@ -64,6 +64,7 @@ exports.register = async (req, res) => {
       email,
       password: hashedPassword,
       role,
+      isActive: role === 'student' ? false : true,
       ...(role === 'student' && { gradeLevel })
     });
 
@@ -109,6 +110,11 @@ exports.login = async (req, res) => {
     }
 
     if (!user.isActive) {
+      if (user.role === 'student') {
+        return res.status(403).json({
+          message: 'የተማሪነት ምዝገባዎ በሬጅስትራር እስኪጸድቅ ድረስ በመጠባበቅ ላይ ነው። እባክዎ ትንሽ ይጠብቁ። (Registration pending approval by registrar)'
+        });
+      }
       return res.status(403).json({ message: 'Account is deactivated' });
     }
 
@@ -180,6 +186,7 @@ exports.getAllUsers = async (req, res) => {
 
     const users = await User.find(filter)
       .select('-password')
+      .populate('parent', 'fullName email')
       .sort({ createdAt: -1 });
 
     res.json({
@@ -203,7 +210,9 @@ exports.getAllUsers = async (req, res) => {
 // ==========================================
 exports.getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select('-password');
+    const user = await User.findById(req.params.id)
+      .select('-password')
+      .populate('parent', 'fullName email');
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -336,13 +345,23 @@ exports.linkParent = async (req, res) => {
     const { studentId } = req.params;
     const { parentId } = req.body;
 
-    if (!parentId) {
-      return res.status(400).json({ message: 'parentId is required' });
-    }
-
     const student = await User.findById(studentId);
     if (!student || student.role !== 'student') {
       return res.status(404).json({ message: 'Student not found' });
+    }
+
+    if (!parentId || parentId === 'none' || parentId === 'unlink') {
+      student.parent = null;
+      await student.save();
+      return res.json({
+        message: 'Parent unlinked successfully',
+        student: {
+          id: student._id,
+          fullName: student.fullName,
+          email: student.email,
+          parent: null
+        }
+      });
     }
 
     const parent = await User.findById(parentId);
@@ -359,7 +378,11 @@ exports.linkParent = async (req, res) => {
         id: student._id,
         fullName: student.fullName,
         email: student.email,
-        parent: parent._id
+        parent: {
+          _id: parent._id,
+          fullName: parent.fullName,
+          email: parent.email
+        }
       }
     });
   } catch (error) {

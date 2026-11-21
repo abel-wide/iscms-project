@@ -80,6 +80,15 @@ export default function StudentProfile() {
               <p className="font-semibold text-slate-800 text-lg">{student.phone || 'አልተመዘገበም'}</p>
             </div>
             <div className="bg-slate-50 p-5 rounded-xl border border-slate-100">
+              <p className="text-sm text-slate-500 mb-1">ወላጅ (Parent)</p>
+              <p className="font-semibold text-slate-800 text-lg">
+                {student.parent ? `👨‍👦 ${student.parent.fullName || student.parent.email}` : 'ወላጅ አልተገናኘም'}
+              </p>
+              {student.parent?.email && (
+                <p className="text-xs text-slate-500">{student.parent.email}</p>
+              )}
+            </div>
+            <div className="bg-slate-50 p-5 rounded-xl border border-slate-100">
               <p className="text-sm text-slate-500 mb-1">የተመዘገበበት ቀን (Joined)</p>
               <p className="font-semibold text-slate-800 text-lg">
                 {student.createdAt ? new Date(student.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}

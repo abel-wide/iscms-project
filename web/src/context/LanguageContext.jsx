@@ -50,6 +50,28 @@ const translations = {
     studentApprovals: "Student Approvals",
     academicRules: "Academic Rules",
 
+    // Student Approvals & Registrations
+    approvalsSubtitle: "Approve or manage student registrations and enrollments",
+    approvedSuccess: "has been approved successfully",
+    noPendingStudents: "No pending students to approve.",
+    pendingApprovals: "Pending Approvals",
+    approvedStudents: "Active / Approved Students",
+    approve: "Approve",
+    deactivate: "Deactivate",
+    allClasses: "All Classes",
+    student: "Student",
+    gradeLevel: "Grade Level",
+    failedToUpdate: "Failed to update status",
+
+    // Parent Linking
+    linkParent: "Link Parent",
+    unlinkParent: "Unlink Parent",
+    linkedParent: "Linked Parent",
+    noParentLinked: "No parent linked",
+    selectParent: "Select Parent",
+    parentLinkedSuccess: "Parent linked to student successfully",
+    parentUnlinkedSuccess: "Parent unlinked successfully",
+
     // Dashboard Titles
     teacherDashboard: "Teacher Dashboard",
     studentDashboard: "Student Dashboard",
@@ -415,6 +437,28 @@ const translations = {
     teacherPerformance: "የመምህራን አፈጻጸም",
     studentApprovals: "የተማሪዎች ምዝገባ ማጽደቂያ",
     academicRules: "የትምህርት ደንቦች",
+
+    // Student Approvals & Registrations
+    approvalsSubtitle: "አዲስ የተመዘገቡ ተማሪዎችን ያረጋግጡ፣ ያጽድቁ እና ያስተዳድሩ",
+    approvedSuccess: "በተሳካ ሁኔታ ጸድቋል",
+    noPendingStudents: "ማጽደቂያ የሚጠብቅ አዲስ ተማሪ የለም።",
+    pendingApprovals: "ማጽደቂያ የሚጠብቁ",
+    approvedStudents: "ንቁ / የጸደቁ ተማሪዎች",
+    approve: "አጽድቅ",
+    deactivate: "አቦዝን",
+    allClasses: "ሁሉም ክፍሎች",
+    student: "ተማሪ",
+    gradeLevel: "የክፍል ደረጃ",
+    failedToUpdate: "ሁኔታውን ማስተካከል አልተቻለም",
+
+    // Parent Linking
+    linkParent: "ወላጅ አገናኝ",
+    unlinkParent: "ወላጅ አላቅቅ",
+    linkedParent: "የተገናኘ ወላጅ",
+    noParentLinked: "ወላጅ አልተገናኘም",
+    selectParent: "ወላጅ ይምረጡ",
+    parentLinkedSuccess: "ወላጅ ከተማሪው ጋር በተሳካ ሁኔታ ተገናኝቷል",
+    parentUnlinkedSuccess: "ወላጅ በተሳካ ሁኔታ ተላቋል",
 
     // Dashboard Titles
     teacherDashboard: "የመምህር ዳሽቦርድ",

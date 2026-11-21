@@ -72,19 +72,19 @@ router.delete(
   deleteClass
 );
 
-// Add student to class (admin/teacher)
+// Add student to class (admin/registrar/teacher)
 router.post(
   '/:id/students',
   protect,
-  allow('admin', 'teacher'),
+  allow('admin', 'registrar', 'teacher'),
   addStudent
 );
 
-// Remove student from class (admin/teacher)
+// Remove student from class (admin/registrar/teacher)
 router.delete(
   '/:id/students/:studentId',
   protect,
-  allow('admin', 'teacher'),
+  allow('admin', 'registrar', 'teacher'),
   removeStudent
 );
 
