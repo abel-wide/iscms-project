@@ -42,12 +42,17 @@ export default function StudentApprovals() {
   }, []);
 
   const handleToggleStatus = async (student, newStatus) => {
+    if (!newStatus) {
+      const confirmMsg = t('confirmDeactivateStudent') || `እርግጠኛ ነዎት ${student.fullName} ን ማገድ (Deactivate ማድረግ) ይፈልጋሉ? ተማሪው አካውንቱ ታግዶ ወደ 'ማጽደቂያ የሚጠብቁ' ዝርዝር ይዛወራል።`;
+      if (!window.confirm(confirmMsg)) return;
+    }
+
     setProcessingId(student._id);
     try {
       await API.put(`/auth/users/${student._id}`, { isActive: newStatus });
       setMessage({
         type: 'success',
-        text: `${student.fullName} ${newStatus ? (t('approvedSuccess') || 'has been approved') : 'has been deactivated'}`
+        text: `${student.fullName} ${newStatus ? (t('approvedSuccess') || 'has been approved') : 'ታግዷል (Deactivated)'}`
       });
       await fetchAllData();
     } catch (err) {
