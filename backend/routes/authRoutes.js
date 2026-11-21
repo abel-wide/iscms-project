@@ -81,7 +81,7 @@ router.get('/users', protect, allow('admin', 'registrar'), getAllUsers);
 router.get('/users/:id', protect, allow('admin', 'registrar'), getUserById);
 
 // Update user
-router.put('/users/:id', protect, allow('admin'), updateUser);
+router.put('/users/:id', protect, allow('admin', 'registrar'), updateUser);
 
 // Delete user
 router.delete('/users/:id', protect, allow('admin'), deleteUser);
