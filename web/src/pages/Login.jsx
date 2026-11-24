@@ -36,11 +36,11 @@ export default function Login() {
       console.error("Login Error:", err);
       
       if (err.code === 'ECONNABORTED') {
-        setError('ጥያቄው በጣም ረጅም ጊዜ ወስዷል። እባክህ የኢንተርኔት ግንኙነትህን አረጋግጥ።');
+        setError('Request timed out. Please check your internet connection and try again.');
       } else if (err.message === 'Network Error') {
-        setError('የባክኤንድ ሰርቨሩ አልተገኘም። ሰርቨሩ መስራቱን አረጋግጥ።');
+        setError('Could not reach the server. Please make sure the server is running.');
       } else {
-        setError(err.response?.data?.message || 'የሎጊን ሙከራ አልተሳካም። እባክህ እንደገና ሞክር።');
+        setError(err.response?.data?.message || 'Login failed. Please try again.');
       }
     } finally {
       setLoading(false);
