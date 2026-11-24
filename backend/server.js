@@ -29,8 +29,6 @@ app.use(helmet()); // የ HTTP ራስጌዎችን ይጠብቃል
 
 // CORS ሴቲንግ
 const allowedOrigins = [
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
   'https://iscms-project.vercel.app',
   'https://localhost',
   'capacitor://localhost'
@@ -38,11 +36,21 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+    // Mobile apps, Postman ወይም server-to-server ጥሪዎች origin የላቸውም
+    if (!origin) return callback(null, true);
+    
+    // Allow any localhost or 127.0.0.1 port (5173, 5174, etc.)
+    if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+      return callback(null, true);
     }
+
+    // Allow Vercel deployments and listed origins
+    if (origin.endsWith('.vercel.app') || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    console.warn(`[CORS Blocked] Origin not allowed: ${origin}`);
+    callback(new Error('Not allowed by CORS'));
   },
   credentials: true
 }));
