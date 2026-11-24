@@ -42,13 +42,15 @@ export default function ChildTimetable() {
       const response = await API.get(`/timetable/class/${timetable.classroom._id}/pdf`, {
         responseType: 'blob'
       });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `timetable_${className || 'child_class'}.pdf`);
       document.body.appendChild(link);
       link.click();
       link.remove();
+      window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error('Download error:', err);
       alert('Could not download timetable PDF.');

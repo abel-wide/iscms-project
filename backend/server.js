@@ -25,7 +25,9 @@ const app = express();
 // ==========================================
 // 👇 የደህንነት ማሻሻያዎች (Security Middleware)
 // ==========================================
-app.use(helmet()); // የ HTTP ራስጌዎችን ይጠብቃል
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+})); // የ HTTP ራስጌዎችን ይጠብቃል እና cross-origin PDF/download ይፈቅዳል
 
 // CORS ሴቲንግ
 const allowedOrigins = [
@@ -52,7 +54,8 @@ app.use(cors({
     console.warn(`[CORS Blocked] Origin not allowed: ${origin}`);
     callback(new Error('Not allowed by CORS'));
   },
-  credentials: true
+  credentials: true,
+  exposedHeaders: ['Content-Disposition']
 }));
 
 app.use(express.json());
