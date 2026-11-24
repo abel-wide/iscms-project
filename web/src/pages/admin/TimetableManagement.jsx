@@ -88,6 +88,8 @@ export default function TimetableManagement() {
     }
   };
 
+  const selectedClass = Array.isArray(classes) ? classes.find((c) => c._id === selectedClassId) : null;
+
   // Download PDF
   const handleDownloadPDF = async () => {
     if (!selectedClassId) return;
@@ -95,6 +97,13 @@ export default function TimetableManagement() {
       const response = await API.get(`/timetable/class/${selectedClassId}/pdf`, {
         responseType: 'blob'
       });
+      // Check if the response is actually an error JSON (not a PDF)
+      const contentType = response.headers['content-type'] || '';
+      if (contentType.includes('application/json')) {
+        const text = await response.data.text();
+        const json = JSON.parse(text);
+        throw new Error(json.message || 'PDF generation failed');
+      }
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -109,8 +118,6 @@ export default function TimetableManagement() {
       alert('Could not download timetable PDF.');
     }
   };
-
-  const selectedClass = Array.isArray(classes) ? classes.find((c) => c._id === selectedClassId) : null;
 
   return (
     <div className="space-y-6">

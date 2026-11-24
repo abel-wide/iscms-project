@@ -49,18 +49,10 @@ export default function ChildGrades() {
     if (!selectedChild) return;
     setDownloading(true);
     try {
-      const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      const response = await fetch(`${baseURL}/grades/report/${selectedChild._id}/download`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      const response = await API.get(`/grades/report/${selectedChild._id}/download`, {
+        responseType: 'blob',
       });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('PDF download failed:', errorText);
-        throw new Error(errorText);
-      }
-      
-      const blob = await response.blob();
+      const blob = new Blob([response.data], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;

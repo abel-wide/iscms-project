@@ -70,7 +70,7 @@ router.get('/report/:studentId/download', protect, async (req, res) => {
       return res.status(404).json({ message: 'Student not found' });
     }
 
-    const marks = await Mark.find({ studentId: req.params.studentId });
+    const marks = await Mark.find({ student: req.params.studentId });
 
     const doc = new PDFDocument();
     res.setHeader('Content-Type', 'application/pdf');
