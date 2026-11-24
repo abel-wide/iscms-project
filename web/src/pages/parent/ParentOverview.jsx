@@ -14,6 +14,7 @@ export default function ParentOverview() {
     attendance: null,
     payments: null
   });
+  const [recentNotifications, setRecentNotifications] = useState([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -43,10 +44,11 @@ export default function ParentOverview() {
 
     const fetchChildData = async () => {
       try {
-        const [gradesRes, attRes, payRes] = await Promise.all([
+        const [gradesRes, attRes, payRes, notifRes] = await Promise.all([
           API.get(`/grades/student/${selectedChild._id}`).catch(() => ({ data: null })),
           API.get(`/attendance/student/${selectedChild._id}`).catch(() => ({ data: null })),
-          API.get(`/payments/student/${selectedChild._id}`).catch(() => ({ data: null }))
+          API.get(`/payments/student/${selectedChild._id}`).catch(() => ({ data: null })),
+          API.get('/notifications/my?limit=4').catch(() => ({ data: { notifications: [] } }))
         ]);
 
         if (!cancelled) {
@@ -55,6 +57,7 @@ export default function ParentOverview() {
             attendance: attRes.data,
             payments: payRes.data
           });
+          setRecentNotifications(notifRes.data?.notifications || []);
         }
       } catch (err) {
         console.error('Failed to load child data:', err);
@@ -224,6 +227,48 @@ export default function ParentOverview() {
           ) : (
             <div className="text-center py-8 text-gray-500 text-sm italic">
               {t('noPaymentsYet') || 'No payments yet'}
+            </div>
+          )}
+        </section>
+
+        {/* Recent Notifications / School Updates */}
+        <section className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 lg:col-span-2">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+              <span>📢</span> {t('notifications') || 'Notifications & Updates'}
+            </h3>
+            <button
+              onClick={() => navigate('/parent/notifications')}
+              className="text-xs font-semibold text-purple-600 hover:text-purple-700 bg-purple-50 px-3 py-1.5 rounded-lg transition"
+            >
+              {t('viewAll') || 'View All'} →
+            </button>
+          </div>
+          {recentNotifications.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {recentNotifications.map((n) => (
+                <div
+                  key={n._id}
+                  onClick={() => navigate('/parent/notifications')}
+                  className={`p-4 rounded-xl border transition cursor-pointer ${
+                    !n.isRead ? 'bg-purple-50/60 border-purple-200 hover:bg-purple-50' : 'bg-slate-50 border-slate-200/70 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <p className={`text-sm ${!n.isRead ? 'font-bold text-purple-950' : 'font-medium text-slate-700'}`}>
+                      {n.title}
+                    </p>
+                    <span className="text-[10px] text-slate-400 font-medium">
+                      {new Date(n.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1 line-clamp-2">{n.message}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-6 text-gray-400 text-sm italic">
+              {t('noNotifications') || 'No notifications yet'}
             </div>
           )}
         </section>

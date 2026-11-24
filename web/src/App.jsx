@@ -177,6 +177,7 @@ export default function App() {
             <Route path="payments" element={<MakePayment />} />
             <Route path="history" element={<PaymentHistory />} />
             <Route path="timetable" element={<ChildTimetable />} />
+            <Route path="notifications" element={<MyNotifications />} />
             <Route path="chat" element={<ChatHub title="Parent-Teacher Communication Hub" />} />
           </Route>
           

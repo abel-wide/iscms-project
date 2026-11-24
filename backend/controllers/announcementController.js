@@ -1,4 +1,6 @@
 const Announcement = require('../models/Announcement');
+const Notification = require('../models/Notification');
+const User = require('../models/User');
 
 // ==========================================
 // 1. CREATE ANNOUNCEMENT
@@ -24,6 +26,30 @@ exports.createAnnouncement = async (req, res) => {
       publishedBy: req.user._id,
       expiresAt: expiresAt ? new Date(expiresAt) : null
     });
+
+    // 👇 Send in-app notification to target audience (parents, students, etc.)
+    try {
+      const recipientFilter = { isActive: true };
+      if (audience === 'students') recipientFilter.role = 'student';
+      else if (audience === 'teachers') recipientFilter.role = 'teacher';
+      else if (audience === 'parents') recipientFilter.role = 'parent';
+      else if (audience === 'staff') recipientFilter.role = { $in: ['admin', 'registrar', 'teacher', 'head'] };
+
+      const recipients = await User.find(recipientFilter, '_id');
+      if (recipients.length > 0) {
+        const notifDocs = recipients.map(u => ({
+          recipient: u._id,
+          sender: req.user._id,
+          title: `Announcement: ${title}`,
+          message: message.length > 150 ? message.slice(0, 150) + '...' : message,
+          type: 'announcement',
+          priority: priority || 'normal'
+        }));
+        await Notification.insertMany(notifDocs);
+      }
+    } catch (notifErr) {
+      console.warn('Failed to dispatch announcement notifications:', notifErr.message);
+    }
 
     res.status(201).json({
       message: 'Announcement published successfully',
