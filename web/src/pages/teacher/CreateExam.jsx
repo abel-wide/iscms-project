@@ -33,13 +33,15 @@ export default function CreateExam() {
         } else {
           // fallback to all classes
           API.get('/classes').then((res) => {
-            setClasses(Array.isArray(res.data) ? res.data : (res.data?.data || []));
+            const clsList = res.data?.classes || (Array.isArray(res.data) ? res.data : (res.data?.data || []));
+            setClasses(clsList);
           }).catch(() => {});
         }
       })
       .catch(() => {
         API.get('/classes').then((res) => {
-          setClasses(Array.isArray(res.data) ? res.data : (res.data?.data || []));
+          const clsList = res.data?.classes || (Array.isArray(res.data) ? res.data : (res.data?.data || []));
+          setClasses(clsList);
         }).catch(() => {});
       });
   }, []);

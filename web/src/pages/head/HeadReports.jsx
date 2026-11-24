@@ -8,7 +8,9 @@ export default function HeadReports() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    API.get('/classes').then(r => setClasses(r.data)).catch(() => {});
+    API.get('/classes')
+      .then(r => setClasses(r.data?.classes || (Array.isArray(r.data) ? r.data : [])))
+      .catch(() => setClasses([]));
   }, []);
 
   const fetchMarks = async () => {
@@ -43,8 +45,8 @@ export default function HeadReports() {
           className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-purple-400 outline-none bg-white"
         >
           <option value="">Select a class</option>
-          {classes.map(c => (
-            <option key={c._id} value={c._id}>{c.name} {c.section} ({c.academicYear})</option>
+          {Array.isArray(classes) && classes.map(c => (
+            <option key={c._id} value={c._id}>{c.name || c.className} {c.section} ({c.academicYear})</option>
           ))}
         </select>
         <button

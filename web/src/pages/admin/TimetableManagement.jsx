@@ -26,13 +26,15 @@ export default function TimetableManagement() {
     const fetchClasses = async () => {
       try {
         const res = await API.get('/classes');
-        const list = res.data?.data || res.data || [];
+        const rawList = res.data?.classes || res.data?.data || res.data || [];
+        const list = Array.isArray(rawList) ? rawList : [];
         setClasses(list);
         if (list.length > 0) {
           setSelectedClassId(list[0]._id);
         }
       } catch (err) {
         console.error('Error fetching classes:', err);
+        setClasses([]);
       }
     };
     fetchClasses();
@@ -106,7 +108,7 @@ export default function TimetableManagement() {
     }
   };
 
-  const selectedClass = classes.find((c) => c._id === selectedClassId);
+  const selectedClass = Array.isArray(classes) ? classes.find((c) => c._id === selectedClassId) : null;
 
   return (
     <div className="space-y-6">
@@ -129,7 +131,7 @@ export default function TimetableManagement() {
               onChange={(e) => setSelectedClassId(e.target.value)}
               className="px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
-              {classes.map((cls) => (
+              {Array.isArray(classes) && classes.map((cls) => (
                 <option key={cls._id} value={cls._id}>
                   {cls.className} ({cls.gradeLevel})
                 </option>

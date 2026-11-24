@@ -17,7 +17,7 @@ export default function HeadOverview() {
         teachers: teachers.value?.data?.length || teachers.value?.data?.total || '—',
         students: students.value?.data?.length || students.value?.data?.total || '—',
         parents: parents.value?.data?.length || parents.value?.data?.total || '—',
-        classes: classes.value?.data?.length || '—',
+        classes: classes.value?.data?.count ?? classes.value?.data?.classes?.length ?? classes.value?.data?.length ?? '—',
       });
     }).finally(() => setLoading(false));
   }, []);
