@@ -1,6 +1,7 @@
 const Timetable = require('../models/Timetable');
 const Class = require('../models/Class');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 const PDFDocument = require('pdfkit');
 
 // Default standard periods
@@ -90,18 +91,22 @@ exports.generateTimetable = async (req, res) => {
       });
     });
 
-    // Assign teachers to subjects
+    // Assign teachers to subjects evenly across all active teachers
     const subjectTeacherMap = new Map();
-    if (classroom.homeroomTeacher) {
-      subjectTeacherMap.set('Mathematics', classroom.homeroomTeacher);
-    }
+    if (allTeachers && allTeachers.length > 0) {
+      subjectWeights.forEach((subj, idx) => {
+        const teacher = allTeachers[idx % allTeachers.length];
+        subjectTeacherMap.set(subj.name, teacher);
+      });
 
-    allTeachers.forEach((t, i) => {
-      const subj = subjectWeights[i % subjectWeights.length]?.name;
-      if (subj && !subjectTeacherMap.has(subj)) {
-        subjectTeacherMap.set(subj, t);
+      // If classroom has a designated homeroom teacher, assign them Mathematics (or primary subject)
+      if (classroom.homeroomTeacher) {
+        const ht = allTeachers.find(
+          (t) => t._id.toString() === (classroom.homeroomTeacher._id || classroom.homeroomTeacher).toString()
+        ) || classroom.homeroomTeacher;
+        subjectTeacherMap.set('Mathematics', ht);
       }
-    });
+    }
 
     // Generate schedule day by day
     const schedule = [];
@@ -128,13 +133,26 @@ exports.generateTimetable = async (req, res) => {
         poolIndex++;
 
         // Find non-clashing teacher
-        let assignedTeacher = subjectTeacherMap.get(chosenSubject) || classroom.homeroomTeacher || null;
+        let assignedTeacher = subjectTeacherMap.get(chosenSubject);
+        if (!assignedTeacher && allTeachers.length > 0) {
+          assignedTeacher = allTeachers[poolIndex % allTeachers.length];
+        }
+        if (!assignedTeacher) {
+          assignedTeacher = classroom.homeroomTeacher || null;
+        }
+
         if (assignedTeacher && teacherBusyMap.has(`${day}_${periodInfo.period}_${assignedTeacher._id.toString()}`)) {
           // If clash, fallback to alternative free teacher
           const freeTeacher = allTeachers.find(
             (t) => !teacherBusyMap.has(`${day}_${periodInfo.period}_${t._id.toString()}`)
           );
-          assignedTeacher = freeTeacher || null;
+          if (freeTeacher) {
+            assignedTeacher = freeTeacher;
+          }
+        }
+
+        if (assignedTeacher) {
+          teacherBusyMap.add(`${day}_${periodInfo.period}_${assignedTeacher._id.toString()}`);
         }
 
         daySlots.push({
@@ -169,6 +187,55 @@ exports.generateTimetable = async (req, res) => {
         path: 'schedule.slots.teacher',
         select: 'fullName email'
       });
+
+    // Send in-app notifications to assigned teachers, students, and parents
+    try {
+      const recipientIds = new Set();
+
+      // 1. All teachers assigned in this schedule
+      schedule.forEach((daySched) => {
+        daySched.slots?.forEach((slot) => {
+          if (slot.teacher) {
+            recipientIds.add(slot.teacher.toString());
+          }
+        });
+      });
+
+      // 2. All students enrolled in this classroom
+      if (classroom.students && classroom.students.length > 0) {
+        classroom.students.forEach((sId) => recipientIds.add(sId.toString()));
+
+        // 3. Parents of enrolled students
+        const studentsWithParents = await User.find({
+          _id: { $in: classroom.students },
+          parent: { $ne: null }
+        }).select('parent');
+        studentsWithParents.forEach((sp) => {
+          if (sp.parent) recipientIds.add(sp.parent.toString());
+        });
+      }
+
+      // Exclude generator user if present
+      if (req.user?._id) {
+        recipientIds.delete(req.user._id.toString());
+      }
+
+      if (recipientIds.size > 0) {
+        const notifDocs = Array.from(recipientIds).map((userId) => ({
+          recipient: userId,
+          sender: req.user?._id || null,
+          title: '📅 New Timetable Generated',
+          message: `A new timetable has been generated for ${classroom.className} (${classroom.academicYear}). Please check your portal schedule.`,
+          type: 'general',
+          priority: 'normal',
+          link: '/timetable',
+          channel: 'in-app'
+        }));
+        await Notification.insertMany(notifDocs);
+      }
+    } catch (notifErr) {
+      console.warn('Failed to dispatch timetable notifications:', notifErr.message);
+    }
 
     res.status(200).json({
       success: true,
@@ -271,7 +338,8 @@ exports.getMyTimetable = async (req, res) => {
           const dayMatch = tt.schedule.find((d) => d.day === day);
           if (dayMatch) {
             dayMatch.slots.forEach((s) => {
-              if (s.teacher && s.teacher._id.toString() === user._id.toString()) {
+              const teacherId = s.teacher?._id ? s.teacher._id.toString() : s.teacher?.toString();
+              if (teacherId && teacherId === user._id.toString()) {
                 slots.push({
                   period: s.period,
                   startTime: s.startTime,
